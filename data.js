@@ -108,7 +108,7 @@
     const membership = memberships?.[0] || null;
     if (!membership) return { user: session.user, profile: profiles?.[0] || null, membership: null, organization: null };
     const organizations = await query("organizations", {
-      select: "id,name,slug,created_at",
+      select: "id,name,slug,support_email,support_phone,business_address,warranty_terms,created_at,updated_at",
       id: `eq.${membership.organization_id}`,
       limit: 1
     });
@@ -261,9 +261,29 @@
     });
   }
 
+  function updateOrganizationSettings(input) {
+    return rpc("update_warrio_organization_settings", {
+      p_organization_id: input.organizationId,
+      p_name: input.name,
+      p_support_email: input.supportEmail || null,
+      p_support_phone: input.supportPhone || null,
+      p_business_address: input.businessAddress || null,
+      p_warranty_terms: input.warrantyTerms || null
+    });
+  }
+
+  function updateModelWarranty(input) {
+    return rpc("update_warrio_model_warranty", {
+      p_organization_id: input.organizationId,
+      p_model_id: input.modelId,
+      p_warranty_months: input.warrantyMonths
+    });
+  }
+
   window.WarrioData = Object.freeze({
     request, query, insert, rpc, edge, signedDocumentUrl, loadContext, loadWorkspace, createOrganization,
     registerSale, issueActivationToken, activateWarranty, confirmInstallation,
-    inviteMember, sendWarrantyEmail, createWorkItem, updateWorkItemStatus, createDealer
+    inviteMember, sendWarrantyEmail, createWorkItem, updateWorkItemStatus, createDealer,
+    updateOrganizationSettings, updateModelWarranty
   });
 })();

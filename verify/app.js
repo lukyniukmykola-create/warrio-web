@@ -23,6 +23,13 @@
     return match ? `${match[3]}.${match[2]}.${match[1]}` : value;
   };
   const validToken = value => /^[A-Za-z0-9_-]{16,128}$/.test(value);
+  const warrantyNumber = value => /^WRR-\d{4}-\d{3,10}$/i.test(value);
+  const extractToken = value => {
+    const trimmed = String(value || "").trim();
+    if (!/^https?:\/\//i.test(trimmed)) return trimmed;
+    try { return new URL(trimmed).searchParams.get("token")?.trim() || ""; }
+    catch { return ""; }
+  };
   const statuses = {
     active_pending_installation: { label: "Активна · очікує монтажу", tone: "verified", title: "Гарантію підтверджено", message: "Гарантія активна, підтвердження монтажу ще очікується." },
     active_installed: { label: "Активна", tone: "verified", title: "Гарантію підтверджено", message: "Обладнання має активну гарантію та підтверджений монтаж." },
@@ -69,12 +76,18 @@
     return Array.isArray(payload) ? payload[0] || null : payload;
   }
 
-  async function lookup(token) {
+  async function lookup(input) {
     formError.textContent = "";
-    tokenInput.value = token;
+    tokenInput.value = input;
+    const token = extractToken(input);
+    if (warrantyNumber(token)) {
+      setVisible(null);
+      formError.textContent = "Це номер гарантії, а не захищений код. У кабінеті знайдіть його через «Гарантії», а для публічної перевірки відкрийте QR або посилання з email/PDF.";
+      return;
+    }
     if (!validToken(token)) {
       setVisible(null);
-      formError.textContent = "Код має містити 16–128 латинських літер, цифр, дефісів або підкреслень.";
+      formError.textContent = "Вставте повне посилання з email/PDF або захищений код із QR (16–128 символів).";
       return;
     }
     setVisible(loading);
@@ -109,9 +122,10 @@
 
   form.addEventListener("submit", event => {
     event.preventDefault();
-    const token = tokenInput.value.trim();
+    const input = tokenInput.value.trim();
+    const token = extractToken(input);
     history.replaceState(null, "", `?token=${encodeURIComponent(token)}`);
-    lookup(token);
+    lookup(input);
   });
 
   byId("check-another").addEventListener("click", () => {

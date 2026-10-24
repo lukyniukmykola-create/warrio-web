@@ -24,15 +24,16 @@
         <div class="shield neutral" aria-hidden="true">✓</div>
         <p class="eyebrow">ОФІЦІЙНА СИСТЕМА WARRIO</p>
         <h1>Перевірка гарантії</h1>
-        <p class="lead">Введіть захищений код із QR або відкрийте посилання з гарантійного талона.</p>
+        <p class="lead">Відскануйте QR або вставте захищений код чи повне посилання з гарантійного email/PDF.</p>
       </div>
 
       <form id="lookup-form" class="lookup" novalidate>
-        <label for="token">Код перевірки</label>
+        <label for="token">Захищений код або посилання</label>
         <div class="lookup-row">
-          <input id="token" name="token" autocomplete="off" spellcheck="false" placeholder="Наприклад: A1b2C3…" maxlength="128">
+          <input id="token" name="token" autocomplete="off" spellcheck="false" placeholder="Вставте код або https://…?token=…" maxlength="512">
           <button type="submit">Перевірити</button>
         </div>
+        <p class="lookup-hint">Номер виду WRR-2026-000003 шукається в кабінеті Warrio. Публічна перевірка навмисно працює лише із захищеним QR-кодом.</p>
         <p id="form-error" class="error" role="alert"></p>
       </form>
 
