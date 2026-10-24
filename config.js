@@ -6,5 +6,5 @@ window.WARRIO_WEB_CONFIG = Object.freeze({
   supabasePublishableKey: "sb_publishable_gH84epIrsBe5AIOOtw3wkg_tx2LRzsl",
   verificationPath: "verify/index.html",
   activationPath: "activate/index.html",
-  supportEmail: "support@warrio.ua"
+  supportEmail: "neofox.richardson@gmail.com"
 });
