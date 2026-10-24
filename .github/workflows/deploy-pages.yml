@@ -1,0 +1,51 @@
+name: Deploy Warrio Web to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Verify static package
+        shell: bash
+        run: |
+          test -f index.html
+          test -f activate/index.html
+          test -f verify/index.html
+          node --check backend.js
+          node --check auth.js
+          node --check data.js
+          node --check auth-ui.js
+          node --check activate/app.js
+          node --check verify/app.js
+          if grep -RIE --include='*.js' --include='*.html' --include='*.json' \
+            '(sb_secret_[A-Za-z0-9_-]{20,}|RESEND_API_KEY.{0,24}re_[A-Za-z0-9_-]{12,}|SUPABASE_SERVICE_ROLE_KEY.{0,24}eyJ[A-Za-z0-9._-]{20,})' .; then
+            echo 'Forbidden browser secret detected.' >&2
+            exit 1
+          fi
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

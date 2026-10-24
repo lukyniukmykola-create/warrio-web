@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Warrio</title>
+  <defs><linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#846fff"/><stop offset="1" stop-color="#4930e8"/></linearGradient></defs>
+  <path fill="url(#g)" d="M11 16.8 27.4 8l12.1 7.1-5.2 11.4 9.2 21.2-14 8.3L12.7 45.8 7.5 27.2 11 16.8Z"/>
+  <path fill="#6750f4" d="m39.1 8 13.8 7.9 3.6 12.4-8.9 7-8.5-19.1V8Z"/>
+</svg>

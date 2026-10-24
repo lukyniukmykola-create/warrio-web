@@ -1,0 +1,14 @@
+{
+  "name": "Warrio",
+  "short_name": "Warrio",
+  "description": "Захищена платформа гарантійного обліку",
+  "lang": "uk",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#5b45f7",
+  "icons": [
+    { "src": "assets/warrio-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

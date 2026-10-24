@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "productVersion": "0.8",
+  "generatedAtUtc": "2026-10-20T10:00:00Z",
+  "warranties": [
+    {
+      "token": "demo-public-token-000001",
+      "warranty": {
+        "warrantyNumber": "WAR-2026-DEMO0001",
+        "status": "Активна гарантія — монтаж підтверджено",
+        "model": "NAVI 600",
+        "serialNumber": "TEST-0001",
+        "saleDate": "17.10.2026",
+        "installDate": "18.10.2026"
+      }
+    }
+  ]
+}

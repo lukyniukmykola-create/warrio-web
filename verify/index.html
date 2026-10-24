@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#5340f5">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://pziqzthhqcqiyerurlyn.supabase.co; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; upgrade-insecure-requests">
+  <meta name="description" content="Публічна перевірка гарантії Warrio без персональних даних">
+  <title>Перевірка гарантії — Warrio</title>
+  <link rel="icon" href="../assets/warrio-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles-v0.7.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <span class="brand" aria-label="Warrio"><span class="mark" aria-hidden="true"><i></i><b></b></span><span>Warrio</span></span>
+      <span class="topbar-label">Перевірка гарантії</span>
+    </header>
+
+    <section class="card">
+      <div id="demo-banner" class="demo" hidden>Демонстраційний режим</div>
+      <div id="lookup-header" class="lookup-header">
+        <div class="shield neutral" aria-hidden="true">✓</div>
+        <p class="eyebrow">ОФІЦІЙНА СИСТЕМА WARRIO</p>
+        <h1>Перевірка гарантії</h1>
+        <p class="lead">Введіть захищений код із QR або відкрийте посилання з гарантійного талона.</p>
+      </div>
+
+      <form id="lookup-form" class="lookup" novalidate>
+        <label for="token">Код перевірки</label>
+        <div class="lookup-row">
+          <input id="token" name="token" autocomplete="off" spellcheck="false" placeholder="Наприклад: A1b2C3…" maxlength="128">
+          <button type="submit">Перевірити</button>
+        </div>
+        <p id="form-error" class="error" role="alert"></p>
+      </form>
+
+      <div id="loading" class="state" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <strong>Перевіряємо гарантію…</strong>
+      </div>
+
+      <section id="result" class="result" hidden aria-live="polite">
+        <div class="verified-hero">
+          <div id="result-shield" class="shield verified" aria-hidden="true">✓</div>
+          <h2 id="result-title">Гарантію підтверджено</h2>
+          <p id="result-message">Обладнання зареєстроване в офіційній гарантійній системі Warrio.</p>
+        </div>
+        <dl class="details">
+          <div><span class="detail-icon">◇</span><span><dt>Модель обладнання</dt><dd id="model"></dd></span></div>
+          <div><span class="detail-icon">║</span><span><dt>Серійний номер (SN)</dt><dd id="serial"></dd></span></div>
+          <div><span class="detail-icon">▤</span><span><dt>Номер гарантії</dt><dd id="warranty-number"></dd></span></div>
+          <div><span class="detail-icon">▣</span><span><dt>Дата продажу</dt><dd id="sale-date"></dd></span></div>
+          <div><span class="detail-icon">⌁</span><span><dt>Статус монтажу</dt><dd id="installation-status"></dd></span></div>
+          <div><span class="detail-icon">♢</span><span><dt>Статус гарантії</dt><dd id="status" class="status-pill"></dd></span></div>
+        </dl>
+
+        <section class="timeline">
+          <h3>Історія гарантії</h3>
+          <p>Ключові підтверджені етапи для цього обладнання.</p>
+          <div class="timeline-row"><span class="timeline-check">✓</span><div><strong>Продаж зареєстровано</strong><small>Запис дилера прийнято системою Warrio.</small></div><time id="timeline-sale"></time></div>
+          <div class="timeline-row"><span class="timeline-check">✓</span><div><strong>Гарантію активовано</strong><small>Дані покупця пройшли перевірку.</small></div><time>Підтверджено</time></div>
+          <div id="timeline-install-row" class="timeline-row"><span class="timeline-check">✓</span><div><strong>Монтаж підтверджено</strong><small>Монтаж обладнання зареєстровано.</small></div><time id="timeline-install"></time></div>
+        </section>
+
+        <div class="privacy"><span>♢</span><p>Перевірка сформована офіційною системою Warrio. ПІБ, телефон, email та адреса власника навмисно не публікуються.</p></div>
+        <button id="check-another" class="secondary" type="button">Перевірити інший код</button>
+      </section>
+
+      <section id="not-found" class="state state-error" hidden aria-live="polite">
+        <span aria-hidden="true">!</span>
+        <div><strong>Гарантію не знайдено</strong><p>Перевірте код або зверніться до продавця обладнання.</p></div>
+      </section>
+    </section>
+
+    <footer>Захищена перевірка Warrio · Персональні дані не публікуються</footer>
+  </main>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
