@@ -134,7 +134,7 @@
       query("warranty_documents", { select: "id,warranty_id,storage_path,google_file_id,public_verification_url,generated_at", organization_id: orgFilter, order: "generated_at.desc", limit: 500 }),
       query("organization_members", { select: "organization_id,user_id,role,is_active,created_at", organization_id: orgFilter, order: "created_at.asc", limit: 200 }),
       query("audit_events", { select: "id,event_type,entity_type,entity_id,metadata,created_at", organization_id: orgFilter, order: "created_at.desc", limit: 50 })
-      ,query("email_jobs", { select: "id,warranty_id,status,attempts,last_error_code,provider,provider_message_id,scheduled_at,sent_at,updated_at", organization_id: orgFilter, order: "created_at.desc", limit: 200 })
+      ,query("email_jobs", { select: "id,warranty_id,status,delivery_status,delivery_event_at,delivery_error,attempts,last_error_code,provider,provider_message_id,scheduled_at,sent_at,updated_at", organization_id: orgFilter, order: "created_at.desc", limit: 200 })
       ,query("work_items", { select: "id,title,description,item_type,status,priority,due_at,sale_id,warranty_id,assigned_user_id,created_by,completed_at,created_at,updated_at", organization_id: orgFilter, order: "due_at.asc.nullslast,created_at.desc", limit: 500 })
     ]);
 
@@ -161,7 +161,7 @@
         activeWarranties: warranties.filter(item => String(item.status).startsWith("active_")).length,
         pendingActivation: Math.max(0, sales.length - warranties.length),
         installed: installations.length,
-        failedEmails: emailJobs.filter(item => item.status === "failed").length,
+        failedEmails: emailJobs.filter(item => item.status === "failed" || ["bounced", "complained", "failed"].includes(item.delivery_status)).length,
         openWorkItems: workItems.filter(item => ["open", "in_progress"].includes(item.status)).length,
         overdueWorkItems: workItems.filter(item => ["open", "in_progress"].includes(item.status) && item.due_at && Date.parse(item.due_at) < Date.now()).length
       }
