@@ -94,7 +94,11 @@
     try {
       const warranty = await findWarranty(token);
       if (!warranty) return setVisible(notFound);
-      const status = statusInfo(warranty.status);
+      const installationRequired = (warranty.installationRequired ?? warranty.installation_required) !== false;
+      const status = { ...statusInfo(warranty.status) };
+      if (!installationRequired && warranty.status === "active_installed") {
+        status.message = "Обладнання має активну гарантію; окреме підтвердження монтажу за правилами компанії не вимагається.";
+      }
       safeText("status", status.label);
       byId("status").className = `status-pill ${status.tone === "verified" ? "" : status.tone}`;
       byId("result-shield").className = `shield ${status.tone}`;
@@ -106,7 +110,7 @@
       safeText("serial", warranty.serialNumber ?? warranty.serial_number);
       safeText("sale-date", formatDate(warranty.saleDate ?? warranty.sale_date));
       const installDate = warranty.installDate ?? warranty.install_date;
-      safeText("installation-status", installDate ? "Підтверджено" : "Очікує підтвердження");
+      safeText("installation-status", !installationRequired ? "Не вимагається" : installDate ? "Підтверджено" : "Очікує підтвердження");
       safeText("timeline-sale", formatDate(warranty.saleDate ?? warranty.sale_date));
       safeText("timeline-install", formatDate(installDate));
       byId("timeline-install-row").hidden = !installDate;

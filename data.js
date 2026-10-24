@@ -108,7 +108,7 @@
     const membership = memberships?.[0] || null;
     if (!membership) return { user: session.user, profile: profiles?.[0] || null, membership: null, organization: null };
     const organizations = await query("organizations", {
-      select: "id,name,slug,support_email,support_phone,business_address,warranty_terms,created_at,updated_at",
+      select: "id,name,slug,support_email,support_phone,business_address,warranty_terms,warranty_start_basis,installation_required,created_at,updated_at",
       id: `eq.${membership.organization_id}`,
       limit: 1
     });
@@ -120,7 +120,7 @@
     };
   }
 
-  async function loadWorkspace(organizationId) {
+  async function loadWorkspace(organizationId, role) {
     if (!organizationId) throw new Error("organization_required");
     const orgFilter = `eq.${organizationId}`;
     const [models, products, dealers, customers, sales, warranties, installations, documents, members, audit, emailJobs, workItems] = await Promise.all([
@@ -145,17 +145,26 @@
     const saleById = new Map(sales.map(item => [item.id, { ...item, product: productById.get(item.product_id) || null, dealer: dealerById.get(item.dealer_id) || null }]));
     const installationByWarranty = new Map(installations.map(item => [item.warranty_id, item]));
     const documentByWarranty = new Map(documents.map(item => [item.warranty_id, item]));
+    const emailByWarranty = new Map();
+    for (const item of emailJobs) if (!emailByWarranty.has(item.warranty_id)) emailByWarranty.set(item.warranty_id, item);
     const enrichedWarranties = warranties.map(item => ({
       ...item,
       sale: saleById.get(item.sale_id) || null,
       customer: customerById.get(item.customer_id) || null,
       installation: installationByWarranty.get(item.id) || null,
-      document: documentByWarranty.get(item.id) || null
+      document: documentByWarranty.get(item.id) || null,
+      emailJob: emailByWarranty.get(item.id) || null
     }));
+
+    let teamDirectory = [];
+    if (["owner", "admin"].includes(role)) {
+      const directory = await edge("manage-member", { action: "list", organizationId });
+      teamDirectory = directory.members || [];
+    }
 
     return {
       models, products, dealers, customers, sales: [...saleById.values()],
-      warranties: enrichedWarranties, installations, documents, members, audit, emailJobs, workItems,
+      warranties: enrichedWarranties, installations, documents, members, teamDirectory, audit, emailJobs, workItems,
       metrics: {
         sales: sales.length,
         activeWarranties: warranties.filter(item => String(item.status).startsWith("active_")).length,
@@ -223,9 +232,19 @@
   }
 
   function sendWarrantyEmail(input) {
-    return edge("send-warranty-email", {
-      warrantyId: input.warrantyId,
-      publicToken: input.publicToken
+    const payload = { warrantyId: input.warrantyId };
+    if (input.publicToken) payload.publicToken = input.publicToken;
+    return edge("send-warranty-email", payload);
+  }
+
+  function manageMember(input) {
+    return edge("manage-member", {
+      action: "update",
+      organizationId: input.organizationId,
+      userId: input.userId,
+      role: input.role,
+      isActive: input.isActive,
+      dealerId: input.dealerId || null
     });
   }
 
@@ -280,10 +299,29 @@
     });
   }
 
+  function updateWarrantyPolicy(input) {
+    return rpc("update_warrio_warranty_policy", {
+      p_organization_id: input.organizationId,
+      p_warranty_start_basis: input.warrantyStartBasis,
+      p_installation_required: input.installationRequired
+    });
+  }
+
+  function manageProductModel(input) {
+    return rpc("manage_warrio_product_model", {
+      p_organization_id: input.organizationId,
+      p_model_id: input.modelId || null,
+      p_code: input.code,
+      p_name: input.name,
+      p_warranty_months: input.warrantyMonths,
+      p_is_active: input.isActive
+    });
+  }
+
   window.WarrioData = Object.freeze({
     request, query, insert, rpc, edge, signedDocumentUrl, loadContext, loadWorkspace, createOrganization,
     registerSale, issueActivationToken, activateWarranty, confirmInstallation,
-    inviteMember, sendWarrantyEmail, createWorkItem, updateWorkItemStatus, createDealer,
-    updateOrganizationSettings, updateModelWarranty
+    inviteMember, sendWarrantyEmail, manageMember, createWorkItem, updateWorkItemStatus, createDealer,
+    updateOrganizationSettings, updateModelWarranty, updateWarrantyPolicy, manageProductModel
   });
 })();

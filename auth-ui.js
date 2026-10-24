@@ -95,7 +95,7 @@
     const context = await window.WarrioData.loadContext();
     currentContext = context;
     if (!context.membership || !context.organization) { view("organization"); return; }
-    const data = await window.WarrioData.loadWorkspace(context.organization.id);
+    const data = await window.WarrioData.loadWorkspace(context.organization.id, context.membership.role);
     updateIdentity(context);
     applyRoleNavigation(context.membership.role);
     document.body.dataset.mode = "live";
