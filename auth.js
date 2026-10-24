@@ -101,13 +101,13 @@
     if (fragment.get("access_token") && fragment.get("refresh_token")) {
       const accessToken = fragment.get("access_token");
       const user = await getUser(accessToken);
-      const redirected = store(normalizeSession({
+      const redirected = store({ ...normalizeSession({
         access_token: accessToken,
         refresh_token: fragment.get("refresh_token"),
         token_type: fragment.get("token_type") || "bearer",
         expires_in: Number(fragment.get("expires_in") || 3600),
         user
-      }));
+      }), recovery: fragment.get("type") === "recovery" });
       history.replaceState(null, "", `${location.pathname}${location.search}`);
       return redirected;
     }
@@ -152,6 +152,28 @@
     return true;
   }
 
+  async function sendPasswordRecovery(email) {
+    const redirectTo = location.origin === "null" ? undefined : `${location.origin}${location.pathname}`;
+    await authRequest(`recover${redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : ""}`, {
+      email: String(email || "").trim().toLowerCase()
+    });
+    return true;
+  }
+
+  async function updatePassword(password) {
+    const current = session || readStored();
+    if (!current?.access_token) throw new Error("authentication_required");
+    const response = await timedFetch(`${baseUrl}/auth/v1/user`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", apikey: apiKey, Authorization: `Bearer ${current.access_token}` },
+      body: JSON.stringify({ password: String(password || "") })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.msg || payload.message || "password_update_failed");
+    store({ ...current, user: payload, recovery: false });
+    return true;
+  }
+
   async function signOut() {
     const current = session;
     store(null);
@@ -163,7 +185,7 @@
   function accessToken() { return session?.access_token || ""; }
 
   window.WarrioAuth = Object.freeze({
-    configured, initialize, signIn, signUp, sendMagicLink, signOut,
+    configured, initialize, signIn, signUp, sendMagicLink, sendPasswordRecovery, updatePassword, signOut,
     refresh, getSession, accessToken
   });
 })();

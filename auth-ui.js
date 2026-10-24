@@ -28,7 +28,7 @@
               <button class="auth-submit" type="submit">Увійти</button>
             </form>
             <div class="auth-error" id="login-error"></div>
-            <div class="auth-links"><button class="auth-link" type="button" data-auth-action="magic">Надіслати посилання для входу</button><button class="auth-link" type="button" data-auth-action="signup">Створити акаунт</button></div>
+            <div class="auth-links"><button class="auth-link" type="button" data-auth-action="recovery">Забули пароль?</button><button class="auth-link" type="button" data-auth-action="signup">Створити акаунт</button></div>
             <div class="auth-separator">АБО</div><button class="auth-secondary" type="button" data-auth-action="demo">Переглянути демонстрацію</button>
             <p class="auth-note">Warrio не просить пароль Google. Авторизація виконується через Supabase Auth, а доступ до даних додатково обмежує RLS.</p>
           </div>
@@ -48,6 +48,14 @@
               <div class="auth-field"><label for="org-slug">Коротка адреса</label><input id="org-slug" value="warrio" required pattern="[a-z0-9][a-z0-9-]{1,61}[a-z0-9]"></div>
               <button class="auth-submit" type="submit">Створити робочий простір</button>
             </form><div class="auth-error" id="organization-error"></div>
+          </div>
+          <div class="auth-view" data-auth-view="reset" hidden>
+            <h2>Новий пароль</h2><p>Вкажіть новий пароль для свого акаунта Warrio.</p>
+            <form class="auth-form" id="reset-form">
+              <div class="auth-field"><label for="reset-password">Новий пароль</label><input id="reset-password" type="password" autocomplete="new-password" required minlength="8" maxlength="72"></div>
+              <div class="auth-field"><label for="reset-password-confirm">Повторіть пароль</label><input id="reset-password-confirm" type="password" autocomplete="new-password" required minlength="8" maxlength="72"></div>
+              <button class="auth-submit" type="submit">Зберегти новий пароль</button>
+            </form><div class="auth-error" id="reset-error"></div>
           </div>
           <div class="auth-view" data-auth-view="message" hidden><h2 id="auth-message-title">Готово</h2><p id="auth-message-text"></p><button class="auth-secondary" type="button" data-auth-action="login">Повернутися до входу</button></div>
         </section>
@@ -85,7 +93,8 @@
     document.querySelectorAll(".nav-btn[data-page]").forEach(button => { button.hidden = !allowed.includes(button.dataset.page); });
     document.querySelectorAll('[data-modal="sale"]').forEach(button => { button.hidden = !["owner","admin","dealer"].includes(role); });
     document.querySelectorAll('[data-page-link="activation"]').forEach(button => { button.hidden = !["owner","admin","dealer"].includes(role); });
-    document.querySelectorAll('[data-modal="dealer"],[data-modal="member"]').forEach(button => { button.hidden = !["owner","admin"].includes(role); });
+    document.querySelectorAll('[data-modal="dealer"]').forEach(button => { button.hidden = !["owner","admin"].includes(role); });
+    document.querySelectorAll('[data-modal="member"]').forEach(button => { button.hidden = role !== "owner"; });
     document.querySelectorAll('[data-modal="installation"]').forEach(button => { button.hidden = !["owner","admin","installer"].includes(role); });
     if (!allowed.includes(document.querySelector(".page.active")?.id?.replace("page-", ""))) document.querySelector('.nav-btn[data-page="dashboard"]')?.click();
   }
@@ -141,11 +150,27 @@
     finally { setBusy(form, false); }
   });
 
+  document.querySelector("#reset-form").addEventListener("submit", async event => {
+    event.preventDefault(); const form = event.currentTarget; const error = document.querySelector("#reset-error"); error.textContent = "";
+    const password = document.querySelector("#reset-password").value;
+    if (password !== document.querySelector("#reset-password-confirm").value) { error.textContent = "Паролі не збігаються."; return; }
+    setBusy(form, true);
+    try { await window.WarrioAuth.updatePassword(password); await window.WarrioAuth.signOut(); document.querySelector("#auth-message-title").textContent = "Пароль змінено"; document.querySelector("#auth-message-text").textContent = "Увійдіть до Warrio з новим паролем."; view("message"); }
+    catch (cause) { error.textContent = errorText(cause); }
+    finally { setBusy(form, false); }
+  });
+
   document.addEventListener("click", async event => {
     const action = event.target.closest("[data-auth-action]")?.dataset.authAction;
     if (action === "demo") enterDemoMode();
     if (action === "login") view("login");
     if (action === "signup") view("signup");
+    if (action === "recovery") {
+      const email = document.querySelector("#login-email").value.trim(); const error = document.querySelector("#login-error");
+      if (!email) { error.textContent = "Спочатку введіть email."; return; }
+      try { await window.WarrioAuth.sendPasswordRecovery(email); document.querySelector("#auth-message-title").textContent = "Перевірте пошту"; document.querySelector("#auth-message-text").textContent = "Ми надіслали безпечне посилання на сторінку зміни пароля."; view("message"); }
+      catch (cause) { error.textContent = errorText(cause); }
+    }
     if (action === "magic") {
       const email = document.querySelector("#login-email").value.trim(); const error = document.querySelector("#login-error");
       if (!email) { error.textContent = "Спочатку введіть email."; return; }
@@ -158,7 +183,7 @@
   (async () => {
     if (!window.WarrioAuth?.configured()) { view("login"); document.querySelector("#login-error").textContent = "Supabase Auth ще не налаштовано."; return; }
     if (sessionStorage.getItem("warrio.demo.enabled") === "1") { enterDemoMode(); return; }
-    try { const session = await window.WarrioAuth.initialize(); if (session) await enterLiveMode(); else view("login"); }
+    try { const session = await window.WarrioAuth.initialize(); if (session?.recovery) view("reset"); else if (session) await enterLiveMode(); else view("login"); }
     catch { view("login"); document.querySelector("#login-error").textContent = "Не вдалося відновити сесію. Увійдіть ще раз."; }
   })();
 

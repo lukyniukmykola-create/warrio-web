@@ -111,6 +111,9 @@
       safeText("sale-date", formatDate(warranty.saleDate ?? warranty.sale_date));
       const installDate = warranty.installDate ?? warranty.install_date;
       safeText("installation-status", !installationRequired ? "Не вимагається" : installDate ? "Підтверджено" : "Очікує підтвердження");
+      safeText("organization-name", warranty.organizationName ?? warranty.organization_name ?? "Компанія-продавець");
+      const supportContacts = [warranty.supportPhone ?? warranty.support_phone, warranty.supportEmail ?? warranty.support_email].filter(Boolean).join(" · ");
+      safeText("support-contacts", supportContacts || "контакти ще не вказано в налаштуваннях компанії");
       safeText("timeline-sale", formatDate(warranty.saleDate ?? warranty.sale_date));
       safeText("timeline-install", formatDate(installDate));
       byId("timeline-install-row").hidden = !installDate;

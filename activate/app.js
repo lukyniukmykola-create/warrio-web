@@ -10,10 +10,17 @@
   let delivery = null;
 
   const params = new URLSearchParams(location.search);
-  document.querySelector("#organization").value = (params.get("org") || "").toLowerCase();
-  document.querySelector("#serial").value = (params.get("sn") || "").toUpperCase();
-  document.querySelector("#activation-code").value = params.get("code") || "";
+  const fixedOrganization = (params.get("org") || "").toLowerCase();
+  const fixedSerial = (params.get("sn") || "").toUpperCase();
+  const fixedCode = params.get("code") || "";
+  document.querySelector("#organization").value = fixedOrganization;
+  document.querySelector("#serial").value = fixedSerial;
+  document.querySelector("#activation-code").value = fixedCode;
   if (params.has("code")) history.replaceState(null, "", location.pathname);
+  if (!fixedOrganization || !fixedSerial || !/^[A-Za-z0-9_-]{32,128}$/.test(fixedCode)) {
+    message.textContent = "Це посилання неповне або пошкоджене. Попросіть продавця створити нове посилання активації.";
+    submit.disabled = true;
+  }
 
   function configured() {
     return /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(baseUrl) && /^sb_publishable_[A-Za-z0-9_-]+$/.test(apiKey);
@@ -32,6 +39,7 @@
       if (!response.ok) {
         const error = new Error(payload.error || `HTTP ${response.status}`);
         error.status = response.status;
+        Object.assign(error, payload);
         throw error;
       }
       return payload;
@@ -41,7 +49,10 @@
   function activationMessage(error) {
     const value = String(error?.message || error || "");
     if (value.includes("sale_or_activation_code_not_found")) return "Продаж або код активації не знайдено. Перевірте SN і повідомлення дилера.";
-    if (value.includes("warranty_already_exists")) return "Для цього обладнання гарантію вже активовано.";
+    if (value.includes("warranty_already_exists")) {
+      const contacts = [error?.supportPhone, error?.supportEmail].filter(Boolean).join(" · ");
+      return `Гарантію для цього обладнання вже оформлено.${error?.organizationName ? ` Компанія: ${error.organizationName}.` : ""}${contacts ? ` Якщо виникла проблема, зверніться: ${contacts}.` : " Зверніться до компанії-продавця."}`;
+    }
     if (value.includes("invalid_customer_data")) return "Перевірте контактні дані та адресу монтажу.";
     if (value.includes("AbortError") || value.includes("aborted")) return "Сервер не відповів вчасно. Повторіть спробу.";
     return "Активацію не виконано. Перевірте дані або зверніться до дилера.";
@@ -77,9 +88,9 @@
     submit.disabled = true; submit.textContent = "Активуємо…";
     try {
       const created = await callFunction("activate-warranty", {
-        organizationSlug: document.querySelector("#organization").value.trim().toLowerCase(),
-        serialNumber: document.querySelector("#serial").value.trim().toUpperCase(),
-        activationCode: document.querySelector("#activation-code").value.trim(),
+        organizationSlug: fixedOrganization,
+        serialNumber: fixedSerial,
+        activationCode: fixedCode,
         customerName: document.querySelector("#customer-name").value.trim(),
         customerPhone: document.querySelector("#customer-phone").value.trim(),
         customerEmail: document.querySelector("#customer-email").value.trim().toLowerCase(),
@@ -88,6 +99,7 @@
       delivery = created;
       document.querySelector("#activation-code").value = "";
       document.querySelector("#warranty-number").textContent = created.warrantyNumber;
+      document.querySelector("#warranty-status").textContent = created.status === "active_installed" ? "Активна" : "Очікує монтажу";
       document.querySelector("#warranty-expiry").textContent = created.expiresOn ? new Date(`${created.expiresOn}T12:00:00`).toLocaleDateString("uk-UA") : "Не визначено";
       document.querySelector("#verify-link").href = verificationUrl(created.publicToken);
       result.classList.add("show");

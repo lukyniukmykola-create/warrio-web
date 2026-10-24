@@ -128,8 +128,8 @@
       query("products", { select: "id,model_id,serial_number,created_at", organization_id: orgFilter, order: "created_at.desc", limit: 500 }),
       query("dealers", { select: "id,code,name,linked_user_id,phone,email,is_active,created_at", organization_id: orgFilter, order: "name.asc", limit: 200 }),
       query("customers", { select: "id,full_name,phone,email,installation_address,created_at", organization_id: orgFilter, order: "created_at.desc", limit: 500 }),
-      query("sales", { select: "id,product_id,dealer_id,dealer_name_snapshot,sale_date,created_at", organization_id: orgFilter, order: "sale_date.desc", limit: 500 }),
-      query("warranties", { select: "id,sale_id,customer_id,warranty_number,status,activated_at,expires_on,created_at", organization_id: orgFilter, order: "created_at.desc", limit: 500 }),
+      query("sales", { select: "id,product_id,dealer_id,dealer_name_snapshot,sale_date,created_at", organization_id: orgFilter, deleted_at: "is.null", order: "sale_date.desc", limit: 500 }),
+      query("warranties", { select: "id,sale_id,customer_id,warranty_number,status,activated_at,expires_on,created_at", organization_id: orgFilter, deleted_at: "is.null", order: "created_at.desc", limit: 500 }),
       query("installations", { select: "id,warranty_id,installed_on,installer_name_snapshot,comment,created_at", organization_id: orgFilter, order: "installed_on.desc", limit: 500 }),
       query("warranty_documents", { select: "id,warranty_id,storage_path,google_file_id,public_verification_url,generated_at", organization_id: orgFilter, order: "generated_at.desc", limit: 500 }),
       query("organization_members", { select: "organization_id,user_id,role,is_active,created_at", organization_id: orgFilter, order: "created_at.asc", limit: 200 }),
@@ -225,9 +225,25 @@
       organizationId: input.organizationId,
       email: input.email,
       fullName: input.fullName,
+      password: input.password,
       role: input.role,
-      dealerId: input.dealerId || undefined,
-      redirectTo: input.redirectTo
+      dealerId: input.dealerId || undefined
+    });
+  }
+
+  function suggestSerial(input) {
+    return rpc("suggest_warrio_serial", {
+      p_organization_id: input.organizationId,
+      p_model_code: input.modelCode
+    });
+  }
+
+  function archiveRecord(input) {
+    return rpc("archive_warrio_record", {
+      p_organization_id: input.organizationId,
+      p_entity_type: input.entityType,
+      p_entity_id: input.entityId,
+      p_reason: input.reason
     });
   }
 
@@ -321,7 +337,7 @@
   window.WarrioData = Object.freeze({
     request, query, insert, rpc, edge, signedDocumentUrl, loadContext, loadWorkspace, createOrganization,
     registerSale, issueActivationToken, activateWarranty, confirmInstallation,
-    inviteMember, sendWarrantyEmail, manageMember, createWorkItem, updateWorkItemStatus, createDealer,
+    inviteMember, suggestSerial, archiveRecord, sendWarrantyEmail, manageMember, createWorkItem, updateWorkItemStatus, createDealer,
     updateOrganizationSettings, updateModelWarranty, updateWarrantyPolicy, manageProductModel
   });
 })();
