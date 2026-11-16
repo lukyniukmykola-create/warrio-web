@@ -45,9 +45,10 @@
   }
 
   // PostgREST caps every response; load all pages so KPIs are never computed from a silent truncation.
-  async function queryAll(table, parameters = {}, pageSize = 500, maxRows = 10000) {
+  async function queryAll(table, parameters = {}, pageSize = 500, maxRows = 10000, tieBreaker = "id") {
     const order = String(parameters.order || "");
-    const stableOrder = order && !/(^|,)id\./.test(order) ? `${order},id.asc` : order || "id.asc";
+    const hasTie = new RegExp(`(^|,)${tieBreaker}\\.`).test(order);
+    const stableOrder = order && !hasTie ? `${order},${tieBreaker}.asc` : order || `${tieBreaker}.asc`;
     const rows = [];
     for (let offset = 0; offset < maxRows; offset += pageSize) {
       const page = await query(table, { ...parameters, order: stableOrder, limit: pageSize, offset });
@@ -146,7 +147,7 @@
       queryAll("warranties", { select: "id,sale_id,customer_id,warranty_number,status,activated_at,expires_on,created_at", organization_id: orgFilter, deleted_at: "is.null", order: "created_at.desc" }),
       queryAll("installations", { select: "id,warranty_id,installed_on,installer_name_snapshot,comment,created_at", organization_id: orgFilter, order: "installed_on.desc" }),
       queryAll("warranty_documents", { select: "id,warranty_id,storage_path,google_file_id,public_verification_url,generated_at", organization_id: orgFilter, order: "generated_at.desc" }),
-      queryAll("organization_members", { select: "organization_id,user_id,role,is_active,created_at", organization_id: orgFilter, order: "created_at.asc" }),
+      queryAll("organization_members", { select: "organization_id,user_id,role,is_active,created_at", organization_id: orgFilter, order: "created_at.asc" }, 500, 10000, "user_id"),
       query("audit_events", { select: "id,event_type,entity_type,entity_id,metadata,created_at", organization_id: orgFilter, order: "created_at.desc", limit: 50 })
       ,queryAll("email_jobs", { select: "id,warranty_id,status,delivery_status,delivery_event_at,delivery_error,attempts,last_error_code,provider,provider_message_id,scheduled_at,sent_at,updated_at", organization_id: orgFilter, order: "created_at.desc" })
       ,queryAll("work_items", { select: "id,title,description,item_type,status,priority,due_at,sale_id,warranty_id,assigned_user_id,created_by,completed_at,created_at,updated_at", organization_id: orgFilter, order: "due_at.asc.nullslast,created_at.desc" })
