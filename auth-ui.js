@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const roleNames = { owner: "Власник", admin: "Адміністратор", dealer: "Дилер", installer: "Монтажник" };
+  const roleNames = { owner: "Власник", admin: "Адміністратор", dealer: "Дилер", installer: "Монтажник", service_manager: "Сервісний менеджер" };
   const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
   let currentContext = null;
 
@@ -44,8 +44,8 @@
           <div class="auth-view" data-auth-view="organization" hidden>
             <h2>Створіть організацію</h2><p>Це окремий захищений простір для вашої компанії, користувачів і гарантій.</p>
             <form class="auth-form" id="organization-form">
-              <div class="auth-field"><label for="org-name">Назва компанії</label><input id="org-name" value="Warrio" required minlength="2" maxlength="160"></div>
-              <div class="auth-field"><label for="org-slug">Коротка адреса</label><input id="org-slug" value="warrio" required pattern="[a-z0-9][a-z0-9-]{1,61}[a-z0-9]"></div>
+              <div class="auth-field"><label for="org-name">Назва компанії</label><input id="org-name" placeholder="Назва вашої компанії" required minlength="2" maxlength="160"></div>
+              <div class="auth-field"><label for="org-slug">Коротка адреса</label><input id="org-slug" placeholder="klimat-plus" required pattern="[a-z0-9][a-z0-9-]{1,61}[a-z0-9]"></div>
               <button class="auth-submit" type="submit">Створити робочий простір</button>
             </form><div class="auth-error" id="organization-error"></div>
           </div>
@@ -72,6 +72,8 @@
     if (raw.includes("already registered")) return "Такий email уже зареєстрований.";
     if (raw.includes("rate limit")) return "Забагато спроб. Спробуйте трохи пізніше.";
     if (raw.includes("timeout") || raw.includes("abort")) return "Supabase не відповів вчасно. Перевірте інтернет і повторіть спробу.";
+    if (raw.includes("organization_limit_reached")) return "Для цього акаунта вже створено організацію. Один користувач може бути власником лише однієї компанії.";
+    if (raw.includes("organization_slug_reserved")) return "Ця коротка адреса зарезервована. Вкажіть іншу.";
     if (raw.includes("organization_slug") || raw.includes("duplicate")) return "Така коротка адреса вже зайнята. Вкажіть іншу.";
     return "Операцію не виконано. Перевірте дані та повторіть спробу.";
   };
@@ -85,10 +87,11 @@
 
   function applyRoleNavigation(role) {
     const allowed = {
-      owner: ["dashboard","sales","warranties","dealers","installations","customers","tasks","reports","documents","team","settings","help"],
-      admin: ["dashboard","sales","warranties","dealers","installations","customers","tasks","reports","documents","team","settings","help"],
-      dealer: ["dashboard","sales","warranties","customers","tasks","documents","help"],
-      installer: ["dashboard","warranties","installations","tasks","help"]
+      owner: ["dashboard","sales","warranties","dealers","installations","customers","tasks","service","reports","documents","team","settings","help"],
+      admin: ["dashboard","sales","warranties","dealers","installations","customers","tasks","service","reports","documents","team","settings","help"],
+      dealer: ["dashboard","sales","warranties","customers","tasks","service","documents","help"],
+      installer: ["dashboard","warranties","installations","tasks","help"],
+      service_manager: ["dashboard","service","help"]
     }[role] || ["dashboard","help"];
     document.querySelectorAll(".nav-btn[data-page]").forEach(button => { button.hidden = !allowed.includes(button.dataset.page); });
     document.querySelectorAll('[data-modal="sale"]').forEach(button => { button.hidden = !["owner","admin","dealer"].includes(role); });
@@ -169,12 +172,6 @@
       const email = document.querySelector("#login-email").value.trim(); const error = document.querySelector("#login-error");
       if (!email) { error.textContent = "Спочатку введіть email."; return; }
       try { await window.WarrioAuth.sendPasswordRecovery(email); document.querySelector("#auth-message-title").textContent = "Перевірте пошту"; document.querySelector("#auth-message-text").textContent = "Ми надіслали безпечне посилання на сторінку зміни пароля."; view("message"); }
-      catch (cause) { error.textContent = errorText(cause); }
-    }
-    if (action === "magic") {
-      const email = document.querySelector("#login-email").value.trim(); const error = document.querySelector("#login-error");
-      if (!email) { error.textContent = "Спочатку введіть email."; return; }
-      try { await window.WarrioAuth.sendMagicLink(email); document.querySelector("#auth-message-title").textContent = "Перевірте пошту"; document.querySelector("#auth-message-text").textContent = "Посилання для входу надіслано. Воно діє обмежений час."; view("message"); }
       catch (cause) { error.textContent = errorText(cause); }
     }
     if (event.target.closest('[data-action="logout"]')) { event.preventDefault();if(window.WarrioAuth.getSession()){await window.WarrioAuth.signOut();location.reload()}else{gate.hidden=false;view("login")} }

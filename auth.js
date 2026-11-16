@@ -72,11 +72,21 @@
     return payload;
   }
 
+  // Only a rejected session logs the user out; a dropped connection retries instead of losing the session.
+  async function runScheduledRefresh() {
+    try { await refresh(); }
+    catch (error) {
+      if ([400, 401, 403].includes(error?.status)) { store(null); return; }
+      if (refreshTimer) clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(runScheduledRefresh, 30000);
+    }
+  }
+
   function scheduleRefresh() {
     if (refreshTimer) clearTimeout(refreshTimer);
     if (!session?.expires_at) return;
     const delay = Math.max(5000, (session.expires_at * 1000) - Date.now() - 60000);
-    refreshTimer = setTimeout(() => refresh().catch(() => store(null)), delay);
+    refreshTimer = setTimeout(runScheduledRefresh, delay);
   }
 
   async function refresh() {
@@ -98,7 +108,8 @@
 
   async function initialize() {
     const fragment = new URLSearchParams(location.hash.replace(/^#/, ""));
-    if (fragment.get("access_token") && fragment.get("refresh_token")) {
+    const linkTypes = new Set(["recovery", "signup", "magiclink", "invite", "email_change"]);
+    if (fragment.get("access_token") && fragment.get("refresh_token") && linkTypes.has(fragment.get("type"))) {
       const accessToken = fragment.get("access_token");
       const user = await getUser(accessToken);
       const redirected = store({ ...normalizeSession({
@@ -143,15 +154,6 @@
     return { confirmationRequired: true, user: payload.user || null };
   }
 
-  async function sendMagicLink(email) {
-    const redirectTo = location.origin === "null" ? undefined : `${location.origin}${location.pathname}`;
-    await authRequest(`otp${redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : ""}`, {
-      email: String(email || "").trim().toLowerCase(),
-      create_user: true
-    });
-    return true;
-  }
-
   async function sendPasswordRecovery(email) {
     const redirectTo = location.origin === "null" ? undefined : `${location.origin}${location.pathname}`;
     await authRequest(`recover${redirectTo ? `?redirect_to=${encodeURIComponent(redirectTo)}` : ""}`, {
@@ -185,7 +187,7 @@
   function accessToken() { return session?.access_token || ""; }
 
   window.WarrioAuth = Object.freeze({
-    configured, initialize, signIn, signUp, sendMagicLink, sendPasswordRecovery, updatePassword, signOut,
+    configured, initialize, signIn, signUp, sendPasswordRecovery, updatePassword, signOut,
     refresh, getSession, accessToken
   });
 })();

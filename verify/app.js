@@ -117,6 +117,7 @@
       safeText("timeline-sale", formatDate(warranty.saleDate ?? warranty.sale_date));
       safeText("timeline-install", formatDate(installDate));
       byId("timeline-install-row").hidden = !installDate;
+      byId("service-link").href = `../service/?token=${encodeURIComponent(token)}`;
       lookupHeader.hidden = true;
       form.hidden = true;
       setVisible(result);
