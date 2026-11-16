@@ -44,6 +44,19 @@
     return request(`${table}?${search}`);
   }
 
+  // PostgREST caps every response; load all pages so KPIs are never computed from a silent truncation.
+  async function queryAll(table, parameters = {}, pageSize = 500, maxRows = 10000) {
+    const order = String(parameters.order || "");
+    const stableOrder = order && !/(^|,)id\./.test(order) ? `${order},id.asc` : order || "id.asc";
+    const rows = [];
+    for (let offset = 0; offset < maxRows; offset += pageSize) {
+      const page = await query(table, { ...parameters, order: stableOrder, limit: pageSize, offset });
+      rows.push(...page);
+      if (page.length < pageSize) break;
+    }
+    return rows;
+  }
+
   function rpc(name, payload) {
     return request(`rpc/${encodeURIComponent(name)}`, {
       method: "POST",
@@ -101,6 +114,7 @@
         select: "organization_id,role,is_active",
         user_id: `eq.${session.user.id}`,
         is_active: "eq.true",
+        order: "created_at.asc",
         limit: 1
       }),
       query("profiles", { select: "user_id,display_name,phone", user_id: `eq.${session.user.id}`, limit: 1 })
@@ -125,17 +139,17 @@
     const orgFilter = `eq.${organizationId}`;
     const [models, products, dealers, customers, sales, warranties, installations, documents, members, audit, emailJobs, workItems] = await Promise.all([
       query("product_models", { select: "id,code,name,warranty_months,is_active", organization_id: orgFilter, order: "name.asc" }),
-      query("products", { select: "id,model_id,serial_number,created_at", organization_id: orgFilter, order: "created_at.desc", limit: 500 }),
-      query("dealers", { select: "id,code,name,linked_user_id,phone,email,is_active,created_at", organization_id: orgFilter, order: "name.asc", limit: 200 }),
-      query("customers", { select: "id,full_name,phone,email,installation_address,created_at", organization_id: orgFilter, order: "created_at.desc", limit: 500 }),
-      query("sales", { select: "id,product_id,dealer_id,dealer_name_snapshot,sale_date,created_at", organization_id: orgFilter, deleted_at: "is.null", order: "sale_date.desc", limit: 500 }),
-      query("warranties", { select: "id,sale_id,customer_id,warranty_number,status,activated_at,expires_on,created_at", organization_id: orgFilter, deleted_at: "is.null", order: "created_at.desc", limit: 500 }),
-      query("installations", { select: "id,warranty_id,installed_on,installer_name_snapshot,comment,created_at", organization_id: orgFilter, order: "installed_on.desc", limit: 500 }),
-      query("warranty_documents", { select: "id,warranty_id,storage_path,google_file_id,public_verification_url,generated_at", organization_id: orgFilter, order: "generated_at.desc", limit: 500 }),
-      query("organization_members", { select: "organization_id,user_id,role,is_active,created_at", organization_id: orgFilter, order: "created_at.asc", limit: 200 }),
+      queryAll("products", { select: "id,model_id,serial_number,created_at", organization_id: orgFilter, order: "created_at.desc" }),
+      queryAll("dealers", { select: "id,code,name,linked_user_id,phone,email,is_active,created_at", organization_id: orgFilter, order: "name.asc" }),
+      queryAll("customers", { select: "id,full_name,phone,email,installation_address,created_at", organization_id: orgFilter, order: "created_at.desc" }),
+      queryAll("sales", { select: "id,product_id,dealer_id,dealer_name_snapshot,sale_date,created_at", organization_id: orgFilter, deleted_at: "is.null", order: "sale_date.desc" }),
+      queryAll("warranties", { select: "id,sale_id,customer_id,warranty_number,status,activated_at,expires_on,created_at", organization_id: orgFilter, deleted_at: "is.null", order: "created_at.desc" }),
+      queryAll("installations", { select: "id,warranty_id,installed_on,installer_name_snapshot,comment,created_at", organization_id: orgFilter, order: "installed_on.desc" }),
+      queryAll("warranty_documents", { select: "id,warranty_id,storage_path,google_file_id,public_verification_url,generated_at", organization_id: orgFilter, order: "generated_at.desc" }),
+      queryAll("organization_members", { select: "organization_id,user_id,role,is_active,created_at", organization_id: orgFilter, order: "created_at.asc" }),
       query("audit_events", { select: "id,event_type,entity_type,entity_id,metadata,created_at", organization_id: orgFilter, order: "created_at.desc", limit: 50 })
-      ,query("email_jobs", { select: "id,warranty_id,status,delivery_status,delivery_event_at,delivery_error,attempts,last_error_code,provider,provider_message_id,scheduled_at,sent_at,updated_at", organization_id: orgFilter, order: "created_at.desc", limit: 200 })
-      ,query("work_items", { select: "id,title,description,item_type,status,priority,due_at,sale_id,warranty_id,assigned_user_id,created_by,completed_at,created_at,updated_at", organization_id: orgFilter, order: "due_at.asc.nullslast,created_at.desc", limit: 500 })
+      ,queryAll("email_jobs", { select: "id,warranty_id,status,delivery_status,delivery_event_at,delivery_error,attempts,last_error_code,provider,provider_message_id,scheduled_at,sent_at,updated_at", organization_id: orgFilter, order: "created_at.desc" })
+      ,queryAll("work_items", { select: "id,title,description,item_type,status,priority,due_at,sale_id,warranty_id,assigned_user_id,created_by,completed_at,created_at,updated_at", organization_id: orgFilter, order: "due_at.asc.nullslast,created_at.desc" })
     ]);
 
     const modelById = new Map(models.map(item => [item.id, item]));
@@ -335,7 +349,7 @@
   }
 
   window.WarrioData = Object.freeze({
-    request, query, insert, rpc, edge, signedDocumentUrl, loadContext, loadWorkspace, createOrganization,
+    request, query, queryAll, insert, rpc, edge, signedDocumentUrl, loadContext, loadWorkspace, createOrganization,
     registerSale, issueActivationToken, activateWarranty, confirmInstallation,
     inviteMember, suggestSerial, archiveRecord, sendWarrantyEmail, manageMember, createWorkItem, updateWorkItemStatus, createDealer,
     updateOrganizationSettings, updateModelWarranty, updateWarrantyPolicy, manageProductModel
