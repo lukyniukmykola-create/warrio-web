@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://pziqzthhqcqiyerurlyn.supabase.co; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>Платформа — Warrio</title>
+  <style>
+    :root{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#141b2f;background:#f4f6fb;line-height:1.45}*{box-sizing:border-box}
+    body{margin:0;min-height:100vh}.top{height:64px;background:#fff;border-bottom:1px solid #e4e7f0;display:flex;align-items:center;gap:12px;padding:0 24px}
+    .brand{font-weight:800;color:#5843f7;font-size:20px}main{max-width:1100px;margin:0 auto;padding:28px 18px}
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+    .card{background:#fff;border:1px solid #e4e7f0;border-radius:16px;padding:18px}.card b{display:block;font-size:28px}.card small{color:#68738c}
+    table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:10px 8px;border-top:1px solid #eef0f6}th{color:#68738c;font-weight:600;border-top:0}
+    .wrap{overflow-x:auto}.msg{color:#68738c;padding:12px 0}a{color:#5843f7}
+    @media(max-width:700px){.cards{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <header class="top"><b class="brand">Warrio</b><span>Платформа · огляд компаній</span><a href="../" style="margin-left:auto">До кабінету</a></header>
+  <main>
+    <p class="msg" id="message" role="status">Завантаження…</p>
+    <section id="content" hidden>
+      <div class="cards">
+        <div class="card"><b id="total-orgs">0</b><small>Компаній</small></div>
+        <div class="card"><b id="total-sales">0</b><small>Продажів</small></div>
+        <div class="card"><b id="total-warranties">0</b><small>Гарантій</small></div>
+        <div class="card"><b id="total-service">0</b><small>Відкритих звернень</small></div>
+      </div>
+      <div class="card wrap"><table><thead><tr><th>Компанія</th><th>Створено</th><th>Команда</th><th>Дилери</th><th>Продажі</th><th>Гарантії</th><th>Сервіс</th><th>Остання активність</th></tr></thead><tbody id="rows"></tbody></table></div>
+    </section>
+  </main>
+  <script src="../config.js"></script>
+  <script src="../backend.js"></script>
+  <script src="../auth.js"></script>
+  <script src="../data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
