@@ -87,11 +87,11 @@
 
   function applyRoleNavigation(role) {
     const allowed = {
-      owner: ["dashboard","sales","warranties","dealers","installations","customers","tasks","service","reports","documents","team","settings","help"],
-      admin: ["dashboard","sales","warranties","dealers","installations","customers","tasks","service","reports","documents","team","settings","help"],
+      owner: ["dashboard","sales","warranties","dealers","installations","customers","tasks","service","stock","reports","documents","team","settings","help"],
+      admin: ["dashboard","sales","warranties","dealers","installations","customers","tasks","service","stock","reports","documents","team","settings","help"],
       dealer: ["dashboard","sales","warranties","customers","tasks","service","documents","help"],
       installer: ["dashboard","warranties","installations","tasks","help"],
-      service_manager: ["dashboard","service","help"]
+      service_manager: ["dashboard","service","stock","help"]
     }[role] || ["dashboard","help"];
     document.querySelectorAll(".nav-btn[data-page]").forEach(button => { button.hidden = !allowed.includes(button.dataset.page); });
     document.querySelectorAll('[data-modal="sale"]').forEach(button => { button.hidden = !["owner","admin","dealer"].includes(role); });
