@@ -30,7 +30,8 @@
       <section class="page" id="page-service">
         <div class="page-head"><div><h1>Сервісні звернення</h1><p>Гарантійні й післягарантійні звернення по проданому обладнанню.</p></div></div>
         <p id="service-msg" role="status" style="color:var(--muted);font-size:13px"></p>
-        <div class="card settings-card" id="service-form-card"><h3>Нове звернення</h3>
+        <button class="btn primary" id="service-new-toggle" type="button" hidden>＋ Нове звернення</button>
+        <div class="card settings-card" id="service-form-card" hidden><h3>Нове звернення</h3>
           <div class="form-grid">
             <div class="form-group full"><label for="service-warranty">Гарантія (серійний номер)</label><select id="service-warranty"></select></div>
             <div class="form-group full"><label for="service-title">Коротко про проблему</label><input id="service-title" maxlength="200"></div>
@@ -42,6 +43,12 @@
         <div class="card table-card" style="margin-top:18px"><div class="table-wrap"><table class="table"><thead><tr><th>Звернення</th><th>Гарантія</th><th>Статус</th><th>Рішення</th><th></th></tr></thead><tbody id="service-body"></tbody></table></div></div>
       </section>`);
     document.querySelector("#service-create").addEventListener("click", createRequest);
+    document.querySelector("#service-new-toggle").addEventListener("click", () => {
+      const card = document.querySelector("#service-form-card");
+      card.hidden = !card.hidden;
+      document.querySelector("#service-new-toggle").textContent = card.hidden ? "＋ Нове звернення" : "Закрити форму";
+      if (!card.hidden) document.querySelector("#service-title").focus();
+    });
     document.querySelector("#service-body").addEventListener("click", event => {
       const button = event.target.closest("[data-service-save]");
       if (button) saveRequest(button.dataset.serviceSave);
@@ -66,7 +73,9 @@
       const serial = new Map(sales.map(sale => [sale.id, productSerial.get(sale.product_id)]));
       const label = new Map(warranties.map(w => [w.id, `${serial.get(w.sale_id) || "—"} · ${w.warranty_number}`]));
       document.querySelector("#service-warranty").innerHTML = warranties.map(w => `<option value="${esc(w.id)}">${esc(label.get(w.id))}</option>`).join("");
-      document.querySelector("#service-form-card").hidden = !["owner", "admin", "dealer", "service_manager"].includes(ctx.membership?.role);
+      const canCreate = ["owner", "admin", "dealer", "service_manager"].includes(ctx.membership?.role);
+      document.querySelector("#service-new-toggle").hidden = !canCreate;
+      if (!canCreate) document.querySelector("#service-form-card").hidden = true;
       document.querySelector("#service-body").innerHTML = requests.map(r => {
         const [statusLabel, statusClass] = STATUS[r.status] || [r.status, "violet"];
         const photos = (r.photo_links || []).filter(link => /^https:\/\//.test(link)).map((link, i) => `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">фото ${i + 1}</a>`).join(" · ");
@@ -95,6 +104,8 @@
         p_description: document.querySelector("#service-description").value.trim(), p_photo_links: photos
       });
       ["#service-title", "#service-description", "#service-photos"].forEach(sel => { document.querySelector(sel).value = ""; });
+      document.querySelector("#service-form-card").hidden = true;
+      document.querySelector("#service-new-toggle").textContent = "＋ Нове звернення";
       await load();
       message("Звернення створено.");
     } catch (error) { message(errorText(error)); }

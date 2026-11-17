@@ -73,7 +73,12 @@
             <div class="form-group"><label for="stock-model">Модель</label><select id="stock-model"></select></div>
             <div class="form-group"><label for="stock-note">Примітка (накладна, партія)</label><input id="stock-note" maxlength="300"></div>
             <div class="form-group full"><label for="stock-serials">Серійні номери: по одному в рядку або через кому. Можна вставити з Excel.</label><textarea id="stock-serials" rows="5" placeholder="N600-26-00128&#10;N600-26-00129"></textarea></div>
-            <div class="form-group full"><label for="stock-file">Або завантажте CSV / TXT файл</label><input id="stock-file" type="file" accept=".csv,.txt,text/csv,text/plain"></div>
+            <div class="form-group full"><label>Або завантажте CSV / TXT файл</label>
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <label class="btn" for="stock-file" style="cursor:pointer;margin:0">Вибрати файл</label>
+                <span id="stock-file-name" style="color:var(--muted);font-size:13px">Файл не вибрано</span>
+                <input id="stock-file" type="file" accept=".csv,.txt,text/csv,text/plain" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+              </div></div>
           </div>
           <button class="btn primary" id="stock-receive" type="button">Прийняти на склад</button>
           <div id="stock-result" style="margin-top:12px;font-size:13px"></div>
@@ -85,10 +90,18 @@
           </div>
         </div>
         <div class="card table-card" style="margin-top:18px"><div class="table-wrap"><table class="table"><thead><tr><th>Серійний номер</th><th>Модель</th><th>Прийнято</th><th>Статус</th><th>Дилер / гарантія</th><th></th></tr></thead><tbody id="stock-body"></tbody></table></div></div>
-        <div class="card settings-card" id="stock-history" style="margin-top:18px" hidden><h3 id="stock-history-title">Історія</h3><ol id="stock-history-list" style="padding-left:18px;line-height:1.7"></ol></div>
+        <div id="stock-history" hidden style="position:fixed;inset:0;z-index:1000;background:rgba(20,27,47,.55);display:none;align-items:center;justify-content:center;padding:18px" role="dialog" aria-modal="true" aria-labelledby="stock-history-title">
+          <div class="card" style="max-width:560px;width:100%;max-height:85vh;overflow:auto;padding:22px;background:var(--card,#fff)">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3 id="stock-history-title" style="margin:0">Історія</h3><button class="btn small" type="button" id="stock-history-close">Закрити</button></div>
+            <ol id="stock-history-list" style="padding-left:18px;line-height:1.8;margin-bottom:0"></ol>
+          </div>
+        </div>
       </section>`);
     $("#stock-receive").addEventListener("click", receive);
     $("#stock-file").addEventListener("change", readFile);
+    $("#stock-history-close").addEventListener("click", closeHistory);
+    $("#stock-history").addEventListener("click", event => { if (event.target.id === "stock-history") closeHistory(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeHistory(); });
     $("#stock-filter").addEventListener("change", loadList);
     let timer;
     $("#stock-search").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(loadList, 300); });
@@ -144,6 +157,7 @@
 
   function readFile(event) {
     const file = event.target.files?.[0];
+    $("#stock-file-name").textContent = file ? file.name : "Файл не вибрано";
     if (!file) return;
     if (file.size > 1024 * 1024) { message("Файл завеликий (максимум 1 МБ)."); event.target.value = ""; return; }
     const reader = new FileReader();
@@ -178,11 +192,18 @@
       }
       $("#stock-result").innerHTML = `<b>Додано: ${summary.received}</b>` + (problems.length
         ? `<br>Пропущено: ${problems.length}<ul>${problems.slice(0, 50).map(text => `<li>${esc(text)}</li>`).join("")}</ul>` : "");
-      if (!problems.length) { $("#stock-serials").value = ""; $("#stock-file").value = ""; }
+      if (!problems.length) { $("#stock-serials").value = ""; $("#stock-file").value = ""; $("#stock-file-name").textContent = "Файл не вибрано"; }
       message("");
       await loadList();
     } catch (error) { message(errorText(error)); }
     finally { button.disabled = false; }
+  }
+
+  function closeHistory() {
+    const modal = $("#stock-history");
+    if (!modal) return;
+    modal.hidden = true;
+    modal.style.display = "none";
   }
 
   async function showHistory(productId, serial) {
@@ -194,8 +215,10 @@
         const detail = [row.note, meta.dealer, meta.warranty_number].filter(Boolean).map(esc).join(" · ");
         return `<li><b>${esc(EVENTS[row.event_type] || row.event_type)}</b> · ${esc(dateText(row.created_at))}${detail ? ` · ${detail}` : ""}</li>`;
       }).join("") || "<li>Подій ще немає.</li>";
-      $("#stock-history").hidden = false;
-      $("#stock-history").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      const modal = $("#stock-history");
+      modal.hidden = false;
+      modal.style.display = "flex";
+      $("#stock-history-close").focus();
     } catch (error) { message(errorText(error)); }
   }
 
