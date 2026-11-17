@@ -19,6 +19,44 @@
     warranty_not_found: "Гарантію не знайдено. Перевірте посилання.",
     invalid_request: "Перевірте заголовок і довжину полів."
   };
+  const statusLabels = { new: "Нове", in_progress: "У роботі", waiting_parts: "Чекаємо запчастини", resolved: "Вирішено", rejected: "Відхилено" };
+  function renderRequests(rows) {
+    const box = document.querySelector("#my-requests");
+    const list = document.querySelector("#my-requests-list");
+    list.textContent = "";
+    if (!Array.isArray(rows) || !rows.length) { box.style.display = "none"; return; }
+    for (const row of rows) {
+      const item = document.createElement("div");
+      item.style.cssText = "padding:10px 0;border-top:1px solid #e4e7f0";
+      const head = document.createElement("b");
+      head.textContent = row.title;
+      const meta = document.createElement("div");
+      meta.style.cssText = "color:#68738c;font-size:13px";
+      meta.textContent = `${statusLabels[row.status] || row.status} · ${new Date(row.created_at).toLocaleDateString("uk-UA")}`;
+      item.append(head, meta);
+      if (row.resolution) {
+        const note = document.createElement("div");
+        note.style.cssText = "font-size:13px;margin-top:4px";
+        note.textContent = `Відповідь компанії: ${row.resolution}`;
+        item.append(note);
+      }
+      list.append(item);
+    }
+    box.style.display = "";
+  }
+  async function loadRequests() {
+    if (!valid) return;
+    try {
+      const response = await fetch(`${baseUrl}/rest/v1/rpc/get_warrio_buyer_service_requests`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: apiKey },
+        body: JSON.stringify({ p_token: token })
+      });
+      if (response.ok) renderRequests(await response.json());
+    } catch { /* the status list is optional */ }
+  }
+  loadRequests();
+
   form.addEventListener("submit", async event => {
     event.preventDefault();
     if (!valid) return;
@@ -47,6 +85,7 @@
       document.querySelector("#support-line").textContent = contact ? `Компанія зв'яжеться з вами. Контакти: ${contact}` : "Компанія зв'яжеться з вами.";
       form.hidden = true;
       document.querySelector("#result").style.display = "";
+      loadRequests();
     } catch {
       message.textContent = "Немає зв'язку із сервером. Спробуйте пізніше.";
       submit.disabled = false;
