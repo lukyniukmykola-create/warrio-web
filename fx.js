@@ -635,6 +635,14 @@
     if (gate.hidden) run();
   }
 
+  // Highlight attention rows that actually have something to look at.
+  function markAttention() {
+    document.querySelectorAll(".attention-row").forEach(row => {
+      const n = parseInt(row.querySelector(".count")?.textContent || "0", 10) || 0;
+      row.classList.toggle("hot", n > 0);
+    });
+  }
+
   function start() {
     appReveal();
     rememberPage();
@@ -643,8 +651,8 @@
     if (host) host.prepend(sound(), theme());
     restructure(); icons(); notifications();
     document.querySelectorAll("select").forEach(enhanceSelect);
-    watch(); scan(); numbers(); plainSymbols(); labelTables(); fieldHints(); navLens(); modalSwipe();
-    new MutationObserver(() => { scan(); queueNumbers(); queueSymbols(); queueTables(); fieldHints(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
+    watch(); scan(); markAttention(); numbers(); plainSymbols(); labelTables(); fieldHints(); navLens(); modalSwipe();
+    new MutationObserver(() => { scan(); markAttention(); queueNumbers(); queueSymbols(); queueTables(); fieldHints(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
       .observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
