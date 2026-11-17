@@ -277,6 +277,79 @@
     setInterval(poll, 45000);
   }
 
+  const TAB_ORDER = ["dashboard", "sales", "warranties", "service"];
+  function goPage(page) {
+    const current = document.querySelector(".page.active")?.id?.replace("page-", "");
+    const a = TAB_ORDER.indexOf(current), b = TAB_ORDER.indexOf(page);
+    document.body.dataset.dir = a < 0 || b < 0 ? "up" : b > a ? "next" : "prev";
+    document.querySelector(`.nav-btn[data-page="${page}"]`)?.click();
+  }
+
+  // "More": a glass sheet with every section, instead of the heavy side menu.
+  function openMore() {
+    if (document.querySelector("#fx-more")) return;
+    const wrap = document.createElement("div");
+    wrap.id = "fx-more";
+    const sheet = document.createElement("div");
+    sheet.className = "fx-sheet";
+    const grip = document.createElement("div"); grip.className = "fx-grip";
+    const grid = document.createElement("div"); grid.className = "fx-more-grid";
+    const skip = new Set(TAB_ORDER);
+    let delay = 0;
+    document.querySelectorAll("#nav .nav-btn[data-page],.sidebar-bottom .nav-btn[data-page]").forEach(nav => {
+      const page = nav.dataset.page;
+      if (nav.hidden || skip.has(page)) return;
+      const item = document.createElement("button");
+      item.type = "button"; item.className = "fx-more-item"; item.style.animationDelay = `${delay}ms`; delay += 25;
+      const ico = document.createElement("span"); ico.className = "fx-more-ico"; ico.innerHTML = nav.querySelector(".ico")?.innerHTML || "";
+      const label = document.createElement("span"); label.textContent = nav.querySelector("span:not(.ico)")?.textContent || page;
+      item.append(ico, label);
+      const badge = nav.querySelector(".nav-badge");
+      if (badge && badge.textContent.trim() !== "0") { const dot = document.createElement("i"); dot.className = "fx-more-badge"; dot.textContent = badge.textContent.trim(); item.append(dot); }
+      item.addEventListener("click", () => { sounds.nav(); close(); setTimeout(() => goPage(page), 120); });
+      grid.append(item);
+    });
+    const tools = document.createElement("div"); tools.className = "fx-more-tools";
+    const user = document.querySelector("#user-menu");
+    const who = document.createElement("div"); who.className = "fx-more-user";
+    who.textContent = user ? `${user.querySelector("strong")?.textContent || ""} · ${user.querySelector("small")?.textContent || ""}` : "";
+    tools.append(who);
+    sheet.append(grip, grid, tools);
+    wrap.append(sheet);
+    document.body.append(wrap);
+    requestAnimationFrame(() => wrap.classList.add("show"));
+    function close() { wrap.classList.remove("show"); setTimeout(() => wrap.remove(), 380); }
+    wrap.addEventListener("click", event => { if (event.target === wrap) { sounds.close(); close(); } });
+    // swipe down to dismiss
+    let y0 = null, dy = 0;
+    sheet.addEventListener("touchstart", e => { y0 = e.touches[0].clientY; dy = 0; sheet.style.transition = "none"; }, { passive: true });
+    sheet.addEventListener("touchmove", e => { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); sheet.style.transform = `translateY(${dy}px)`; }, { passive: true });
+    sheet.addEventListener("touchend", () => { sheet.style.transition = ""; if (dy > 90) { sheet.style.transform = ""; close(); } else sheet.style.transform = ""; y0 = null; });
+  }
+
+  // Standard symbols (arrows, check marks) must not turn into colour emoji on iPhone.
+  const EMOJI_RISK = /[↗↘↔↩↪↖↙⬅➡⬆⬇✔✖▶◀⚠ℹ☑✓↻⇩⇧→←↑↓](?!\uFE0E)/g;
+  function plainSymbols(root = document.body) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) { const n = walker.currentNode; if (EMOJI_RISK.test(n.nodeValue)) nodes.push(n); EMOJI_RISK.lastIndex = 0; }
+    for (const n of nodes) {
+      if (n.parentElement?.closest("script,style")) continue;
+      const trend = n.parentElement?.closest(".trend");
+      if (trend && /^\s*[↗↘]/.test(n.nodeValue) && !trend.querySelector("svg")) {
+        const up = n.nodeValue.trim().startsWith("↗");
+        const svg = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="${up ? "M7 17 17 7M8 7h9v9" : "M7 7l10 10M17 8v9H8"}"/></svg>`;
+        const rest = n.nodeValue.replace(/^\s*[↗↘]\uFE0E?\s*/, "");
+        const holder = document.createElement("span"); holder.innerHTML = svg;
+        n.nodeValue = rest; n.parentNode.insertBefore(holder.firstChild, n);
+        continue;
+      }
+      n.nodeValue = n.nodeValue.replace(EMOJI_RISK, "$&\uFE0E");
+    }
+  }
+  let symQueued = false;
+  const queueSymbols = () => { if (!symQueued) { symQueued = true; requestAnimationFrame(() => { symQueued = false; plainSymbols(); }); } };
+
   // Bottom tab bar on phones: the five things used most, plus the full menu.
   function tabbar() {
     if ($tab("#fx-tabbar")) return;
@@ -294,8 +367,8 @@
       b.type = "button"; b.dataset.tab = page; b.innerHTML = `${icon}<span>${label}</span>`;
       b.addEventListener("click", () => {
         sounds.nav();
-        if (page === "menu") { document.querySelector("#sidebar")?.classList.toggle("open"); return; }
-        document.querySelector(`.nav-btn[data-page="${page}"]`)?.click();
+        if (page === "menu") { openMore(); return; }
+        goPage(page);
       });
       bar.append(b);
     }
@@ -342,17 +415,20 @@
       const target = under(event.clientX);
       if (target) place(target, true);
     });
+    let suppress = false;
     const release = event => {
       if (!down) return;
       down = false;
       bar.classList.remove("grab");
       const target = under(event.clientX);
-      if (dragging && target) { target.click(); }
-      setTimeout(() => { dragging = false; sync(); }, 0);
+      const wasDrag = dragging;
+      dragging = false;
+      if (wasDrag && target) { suppress = false; target.click(); suppress = true; setTimeout(() => { suppress = false; }, 80); }
+      setTimeout(sync, 0);
     };
     bar.addEventListener("pointerup", release);
     bar.addEventListener("pointercancel", () => { down = false; bar.classList.remove("grab"); sync(); });
-    bar.addEventListener("click", event => { if (dragging) { event.stopPropagation(); event.preventDefault(); } }, true);
+    bar.addEventListener("click", event => { if (suppress) { event.stopPropagation(); event.preventDefault(); } }, true);
     requestAnimationFrame(() => { sync(); bar.classList.add("ready"); });
   }
   const $tab = selector => document.querySelector(selector);
@@ -366,8 +442,8 @@
     if (host) host.prepend(sound(), theme());
     restructure(); icons(); notifications();
     document.querySelectorAll("select").forEach(enhanceSelect);
-    watch(); scan(); numbers();
-    new MutationObserver(() => { scan(); queueNumbers(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
+    watch(); scan(); numbers(); plainSymbols();
+    new MutationObserver(() => { scan(); queueNumbers(); queueSymbols(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
       .observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();

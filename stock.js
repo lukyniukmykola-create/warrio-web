@@ -68,7 +68,7 @@
       '<button class="nav-btn" data-page="stock" hidden><span class="ico" data-icon="box"></span><span>Склад</span></button>');
     $("#page-service")?.insertAdjacentHTML("afterend", `
       <section class="page" id="page-stock">
-        <div class="page-head"><div><h1>Склад</h1><p>Прийом товару за серійними номерами, наявність і повна історія кожного виробу.</p></div><div class="actions"><button class="btn" id="stock-labels-open" type="button" title="Наклейки з QR для виробів, що зараз на складі">🏷 Наклейки зі складу (QR)</button></div></div>
+        <div class="page-head"><div><h1>Склад</h1><p>Прийом товару за серійними номерами, наявність і повна історія кожного виробу.</p></div><div class="actions"><button class="btn" id="stock-labels-open" type="button" title="Наклейки з QR для виробів, що зараз на складі">Наклейки зі складу (QR)</button></div></div>
         <p id="stock-msg" role="status" style="display:none;margin:12px 0;padding:10px 14px;border-radius:10px;background:#fff4e5;color:#7a4b00;font-size:14px"></p>
         <div class="card settings-card" id="stock-receive-card"><h3>Прийняти товар</h3>
           <div class="form-grid">
