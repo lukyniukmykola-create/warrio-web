@@ -14,9 +14,9 @@
     function close() {
       if (closed) return; closed = true;
       el.classList.add("out");
-      setTimeout(function () { el.remove(); root.classList.remove("intro"); }, 1100);
+      setTimeout(function () { el.remove(); root.classList.remove("intro"); }, 1000);
     }
     el.addEventListener("click", close);
-    setTimeout(close, 5600);
+    setTimeout(close, 3300);
   });
 })();

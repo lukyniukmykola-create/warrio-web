@@ -615,7 +615,28 @@
     }, 250);
   }
 
+  // Smooth entrance of the whole app after sign-in / session restore / splash.
+  function appReveal() {
+    const root = document.documentElement;
+    let busy = false;
+    const run = () => {
+      if (busy || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const splash = document.querySelector("#warrio-intro");
+      if (splash && root.classList.contains("intro") && !splash.classList.contains("out")) { setTimeout(run, 150); return; }
+      busy = true;
+      document.querySelectorAll(".page.active :is(.card,.stat,.metric,.job,.dealer,.kanban-col)").forEach((el, i) => el.style.setProperty("--ai", Math.min(i, 9)));
+      root.classList.add("app-in");
+      setTimeout(() => { root.classList.remove("app-in"); busy = false; }, 2400);
+    };
+    const gate = document.querySelector("#auth-gate");
+    if (!gate) { run(); return; }
+    let wasHidden = gate.hidden;
+    new MutationObserver(() => { if (gate.hidden && !wasHidden) run(); wasHidden = gate.hidden; }).observe(gate, { attributes: true, attributeFilter: ["hidden"] });
+    if (gate.hidden) run();
+  }
+
   function start() {
+    appReveal();
     rememberPage();
     tabbar();
     const host = document.querySelector(".top-actions");
