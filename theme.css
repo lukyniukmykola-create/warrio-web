@@ -550,23 +550,24 @@ html[data-theme=dark] .kanban-head h3{color:var(--ink)!important}
  .fx-more-row button{min-height:44px}
 }
 
-/* ===== First-visit splash ===== */
+/* ===== First-visit splash (slow and sequential: logo, then name, then tagline) ===== */
 #warrio-intro{display:none}
-html.intro #warrio-intro{display:flex;position:fixed;inset:0;z-index:2147483600;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:radial-gradient(90% 70% at 50% 38%,#6a52f5 0%,#2d2170 48%,#110d2b 100%);color:#fff;overflow:hidden;transition:opacity .75s ease,transform .75s cubic-bezier(.3,.7,.3,1),filter .75s}
-html.intro #warrio-intro.out{opacity:0;transform:scale(1.1);filter:blur(10px);pointer-events:none}
-.wi-orb{position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(139,116,255,.55),transparent 65%);filter:blur(20px);animation:wiOrb 3.4s ease-in-out infinite alternate}
-@keyframes wiOrb{from{transform:translate(-60px,-70px) scale(.9)}to{transform:translate(60px,60px) scale(1.15)}}
-.wi-mark{position:relative;width:104px;height:104px;margin-bottom:22px;display:grid;place-items:center}
-.wi-mark:before,.wi-mark:after{content:"";position:absolute;inset:0;border-radius:32px;border:2px solid rgba(255,255,255,.4);opacity:0;animation:wiRing 2.4s ease-out infinite 1s}
-.wi-mark:after{animation-delay:1.7s}
-@keyframes wiRing{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.1);opacity:0}}
-.wi-mark .logo{width:96px!important;height:96px!important;border-radius:30px!important;box-shadow:0 20px 60px rgba(106,82,245,.7),inset 0 2px 0 rgba(255,255,255,.4);animation:wiPop 1.1s cubic-bezier(.3,1.45,.5,1) both .15s,wiFloat 3.2s ease-in-out infinite 1.3s}
-@keyframes wiPop{0%{transform:scale(.1) rotate(-70deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
-@keyframes wiFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(2deg)}}
+html.intro #warrio-intro{display:flex;position:fixed;inset:0;z-index:2147483600;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:radial-gradient(90% 70% at 50% 38%,#6a52f5 0%,#2d2170 48%,#110d2b 100%);color:#fff;overflow:hidden;cursor:pointer;transition:opacity 1s ease,transform 1.1s cubic-bezier(.3,.7,.3,1),filter 1s}
+html.intro #warrio-intro.out{opacity:0;transform:scale(1.06);filter:blur(8px);pointer-events:none}
+.wi-orb{position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(139,116,255,.5),transparent 65%);filter:blur(24px);opacity:0;animation:wiOrbIn 1.6s ease both .1s,wiOrb 6s ease-in-out infinite alternate .1s}
+@keyframes wiOrbIn{to{opacity:1}}
+@keyframes wiOrb{from{transform:translate(-50px,-60px) scale(.92)}to{transform:translate(50px,50px) scale(1.12)}}
+.wi-mark{position:relative;width:104px;height:104px;margin-bottom:26px;display:grid;place-items:center}
+.wi-mark:before,.wi-mark:after{content:"";position:absolute;inset:0;border-radius:32px;border:2px solid rgba(255,255,255,.35);opacity:0;animation:wiRing 3.2s ease-out infinite 2s}
+.wi-mark:after{animation-delay:3.2s}
+@keyframes wiRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(2);opacity:0}}
+.wi-mark .logo{width:96px!important;height:96px!important;border-radius:30px!important;box-shadow:0 20px 60px rgba(106,82,245,.6),inset 0 2px 0 rgba(255,255,255,.4);opacity:0;animation:wiPop 1.5s cubic-bezier(.22,1.15,.36,1) both .5s,wiFloat 4s ease-in-out infinite 2s}
+@keyframes wiPop{0%{transform:scale(.4) rotate(-30deg);opacity:0;filter:blur(10px)}100%{transform:scale(1) rotate(0);opacity:1;filter:none}}
+@keyframes wiFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .wi-word{display:flex;font-size:46px;font-weight:700;letter-spacing:-.025em;line-height:1}
-.wi-word span{display:inline-block;animation:wiLetter .75s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(.85s + var(--i)*.075s)}
-@keyframes wiLetter{from{opacity:0;transform:translateY(26px) scale(.85);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
-.wi-sub{margin:10px 0 0;font-size:15px;letter-spacing:.06em;color:rgba(255,255,255,.72);opacity:0;animation:wiFade .9s ease both 1.7s}
+.wi-word span{display:inline-block;opacity:0;animation:wiLetter 1s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(2.1s + var(--i)*.14s)}
+@keyframes wiLetter{from{opacity:0;transform:translateY(20px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+.wi-sub{margin:12px 0 0;font-size:15px;letter-spacing:.08em;color:rgba(255,255,255,.75);opacity:0;animation:wiFade 1.2s ease both 3.5s}
 @keyframes wiFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* ===== Login on phones ===== */

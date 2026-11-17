@@ -581,7 +581,42 @@
     if (matchMedia("(max-width:760px)").matches && event.target.closest("#sidebar .nav-btn[data-page]")) document.querySelector("#sidebar")?.classList.remove("open");
   });
 
+
+  // Remember the open section so a refresh doesn't throw you back to the overview.
+  function rememberPage() {
+    const KEY = "warrio-page";
+    const current = () => document.querySelector(".page.active")?.id?.replace("page-", "") || "";
+    let saved = "";
+    try { saved = localStorage.getItem(KEY) || ""; } catch { /* ignore */ }
+    let ready = !saved || saved === "dashboard" || saved === "activation";
+    let tries = 0, restoredAt = 0, userNav = false, auto = false;
+    const save = () => { if (!ready) return; const c = current(); if (c && c !== "activation") { try { localStorage.setItem(KEY, c); } catch { /* ignore */ } } };
+    document.addEventListener("click", event => { if (event.target.closest?.("[data-page],[data-page-link]")) { if (!auto) userNav = true; setTimeout(save, 60); } }, true);
+    new MutationObserver(save).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
+    if (ready) return;
+    const gateOpen = () => { const g = document.querySelector("#auth-gate"); return !g || g.hidden; };
+    const timer = setInterval(() => {
+      tries += 1;
+      if (tries > 80) { clearInterval(timer); ready = true; return; }
+      if (!gateOpen()) return;
+      const btn = document.querySelector(`.nav-btn[data-page="${saved}"]`);
+      if (!btn || btn.hidden) { if (tries > 12) { clearInterval(timer); ready = true; } return; }
+      if (!restoredAt) {
+        restoredAt = tries;
+        document.body.dataset.dir = "up";
+        if (current() !== saved) { auto = true; btn.click(); auto = false; }
+        return;
+      }
+      // the app may reset to the overview once live data arrives: put it back once
+      if (tries - restoredAt >= 5) {
+        if (!userNav && current() !== saved && !document.querySelector("#fx-more")) { auto = true; btn.click(); auto = false; }
+        clearInterval(timer); setTimeout(() => { ready = true; }, 400);
+      }
+    }, 250);
+  }
+
   function start() {
+    rememberPage();
     tabbar();
     const host = document.querySelector(".top-actions");
     if (host) host.prepend(sound(), theme());
