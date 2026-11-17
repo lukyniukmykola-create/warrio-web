@@ -51,6 +51,7 @@
     "Спершу додайте модель у розділі продуктів.": "Add a model in the products section first.",
     "Потрібно від 1 до 500 серійних номерів за раз.": "1 to 500 serial numbers at a time.",
     "вже є в базі": "already exists", "додано": "added", "неправильний формат": "invalid format", "повтор у списку": "duplicate in the list",
+    "Вибрати файл": "Choose file", "Файл не вибрано": "No file chosen", "＋ Нове звернення": "＋ New request", "Закрити форму": "Close form",
     "Огляд": "Overview", "Продажі": "Sales", "Гарантії": "Warranties", "Дилери": "Dealers", "Монтажі": "Installations",
     "Клієнти": "Customers", "Завдання": "Tasks", "Сервіс": "Service", "Склад": "Warehouse", "Звіти": "Reports",
     "Документи": "Documents", "Команда": "Team", "Налаштування": "Settings", "Допомога": "Help", "МЕНЮ": "MENU", "ЗАГАЛЬНЕ": "GENERAL",
