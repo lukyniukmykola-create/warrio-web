@@ -381,3 +381,21 @@ html[data-theme=dark] .fx-grip{background:rgba(255,255,255,.3)}
 html[data-theme=dark] .fx-more-item{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.06));color:#ece9ff;box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1.5px 0 rgba(255,255,255,.22),0 0 0 1px rgba(255,255,255,.08)}
 html[data-theme=dark] .fx-more-tools{background:rgba(255,255,255,.08);color:#c9c3ee}
 body:has(#fx-more) #lang-switch{opacity:0!important;pointer-events:none}
+.fx-more-grid{position:relative;touch-action:none;user-select:none;-webkit-user-select:none}
+.fx-grip{padding:10px 60px;background-clip:content-box;height:25px;box-sizing:content-box;margin:-8px auto 4px;background:transparent;position:relative}
+.fx-grip:after{content:"";position:absolute;left:50%;top:50%;width:38px;height:5px;margin:-2px 0 0 -19px;border-radius:5px;background:rgba(60,50,110,.28)}
+html[data-theme=dark] .fx-grip{background:transparent}
+html[data-theme=dark] .fx-grip:after{background:rgba(255,255,255,.3)}
+.fx-more-lens{position:absolute;left:0;top:0;width:0;height:0;border-radius:24px;pointer-events:none;z-index:3;opacity:0;
+ background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.28));
+ box-shadow:0 12px 30px rgba(70,50,200,.3),inset 0 2px 0 #fff,inset 0 -3px 10px rgba(120,100,255,.2),0 0 0 1.5px rgba(255,255,255,.8);
+ -webkit-backdrop-filter:blur(4px) saturate(180%) brightness(1.08);backdrop-filter:blur(4px) saturate(180%) brightness(1.08);
+ transition:transform .5s cubic-bezier(.3,1.45,.55,1),width .4s cubic-bezier(.3,1.3,.55,1),height .4s cubic-bezier(.3,1.3,.55,1),opacity .2s}
+.fx-more-lens.on{opacity:1}
+.fx-more-item.lit{color:#2a1f6b}
+.fx-more-item.lit .fx-more-ico{transform:scale(1.12);transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.fx-more-ico{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+html[data-theme=dark] .fx-more-lens{background:linear-gradient(180deg,rgba(170,150,255,.5),rgba(110,85,255,.22));box-shadow:0 12px 30px rgba(100,70,255,.45),inset 0 2px 0 rgba(255,255,255,.4),0 0 0 1.5px rgba(200,185,255,.4)}
+html[data-theme=dark] .fx-more-item.lit{color:#fff}
+.fx-more-lens{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.08))!important}
+html[data-theme=dark] .fx-more-lens{background:linear-gradient(180deg,rgba(190,170,255,.3),rgba(120,95,255,.08))!important}

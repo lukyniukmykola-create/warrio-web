@@ -320,11 +320,64 @@
     requestAnimationFrame(() => wrap.classList.add("show"));
     function close() { wrap.classList.remove("show"); setTimeout(() => wrap.remove(), 380); }
     wrap.addEventListener("click", event => { if (event.target === wrap) { sounds.close(); close(); } });
-    // swipe down to dismiss
+    // Glass lens: press and slide over the tiles, release on one to open it.
+    const lens = document.createElement("i");
+    lens.className = "fx-more-lens";
+    grid.prepend(lens);
+    const tiles = () => [...grid.querySelectorAll(".fx-more-item")];
+    const tileAt = (x, y) => {
+      let best = null, bd = 1e9;
+      for (const t of tiles()) {
+        const r = t.getBoundingClientRect();
+        const dx = x < r.left ? r.left - x : x > r.right ? x - r.right : 0;
+        const dy = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0;
+        const d = Math.hypot(dx, dy);
+        if (d < bd) { bd = d; best = t; }
+      }
+      return bd < 40 ? best : null;
+    };
+    const moveLens = (tile, grabbed) => {
+      if (!tile) { lens.classList.remove("on"); return; }
+      const g = grid.getBoundingClientRect(), r = tile.getBoundingClientRect();
+      lens.style.width = `${r.width}px`; lens.style.height = `${r.height}px`;
+      lens.style.transform = `translate(${r.left - g.left}px,${r.top - g.top}px)${grabbed ? " scale(1.07)" : ""}`;
+      lens.classList.add("on");
+      tiles().forEach(t => t.classList.toggle("lit", t === tile));
+    };
+    let down = false, drag = false, sx = 0, sy = 0, last = null, suppress = false;
+    grid.addEventListener("pointerdown", e => {
+      down = true; drag = false; sx = e.clientX; sy = e.clientY;
+      grid.classList.add("grab");
+      last = tileAt(e.clientX, e.clientY);
+      moveLens(last, true);
+    });
+    grid.addEventListener("pointermove", e => {
+      if (!down) return;
+      if (Math.hypot(e.clientX - sx, e.clientY - sy) > 8) drag = true;
+      const t = tileAt(e.clientX, e.clientY);
+      if (t !== last) { last = t; if (t) sounds.click(); }
+      moveLens(t, true);
+    });
+    const finish = (e, cancel) => {
+      if (!down) return;
+      down = false;
+      grid.classList.remove("grab");
+      const t = cancel ? null : tileAt(e.clientX, e.clientY);
+      const wasDrag = drag; drag = false;
+      tiles().forEach(x => x.classList.remove("lit"));
+      lens.classList.remove("on");
+      if (wasDrag && t) { suppress = false; t.click(); suppress = true; setTimeout(() => { suppress = false; }, 80); }
+    };
+    grid.addEventListener("pointerup", e => finish(e, false));
+    grid.addEventListener("pointercancel", e => finish(e, true));
+    grid.addEventListener("click", e => { if (suppress) { e.stopPropagation(); e.preventDefault(); } }, true);
+
+    // swipe down on the handle area to dismiss
     let y0 = null, dy = 0;
-    sheet.addEventListener("touchstart", e => { y0 = e.touches[0].clientY; dy = 0; sheet.style.transition = "none"; }, { passive: true });
-    sheet.addEventListener("touchmove", e => { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); sheet.style.transform = `translateY(${dy}px)`; }, { passive: true });
-    sheet.addEventListener("touchend", () => { sheet.style.transition = ""; if (dy > 90) { sheet.style.transform = ""; close(); } else sheet.style.transform = ""; y0 = null; });
+    const top = sheet.querySelector(".fx-grip");
+    top.addEventListener("touchstart", e => { y0 = e.touches[0].clientY; dy = 0; sheet.style.transition = "none"; }, { passive: true });
+    top.addEventListener("touchmove", e => { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); sheet.style.transform = `translateY(${dy}px)`; }, { passive: true });
+    top.addEventListener("touchend", () => { sheet.style.transition = ""; sheet.style.transform = ""; if (dy > 70) close(); y0 = null; });
   }
 
   // Standard symbols (arrows, check marks) must not turn into colour emoji on iPhone.
