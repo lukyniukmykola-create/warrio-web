@@ -234,3 +234,8 @@ html[data-theme=dark] .fx-opt.sel{background:var(--violet);color:#fff}
 html[data-theme=dark] .fx-opt.sel:after{border-color:#fff}
 html[data-theme=dark] input[type=checkbox]:checked{background:var(--violet)!important}
 @media(min-width:1151px) and (max-height:900px){.nav-btn{min-height:35px!important;padding-top:6px!important;padding-bottom:6px!important}.sidebar{padding-top:16px!important;padding-bottom:12px!important}.sidebar .brand{padding-bottom:10px!important}.sidebar #user-menu{margin-top:6px;padding:8px 12px}.menu-title{padding-top:8px!important}}
+
+/* Hybrid typography: system font for text, Inter for figures and badges */
+.fx-num,.stat strong,.status,.nav-badge,.trend,.attention-row b{font-family:"Warrio Sans",Inter,"Segoe UI",sans-serif!important;font-variant-numeric:tabular-nums;font-feature-settings:"tnum","cv11"}
+.fx-num{font-weight:500}
+.stat strong.fx-num,.stat strong{font-weight:600}
