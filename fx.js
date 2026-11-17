@@ -311,9 +311,23 @@
     });
     const tools = document.createElement("div"); tools.className = "fx-more-tools";
     const user = document.querySelector("#user-menu");
-    const who = document.createElement("div"); who.className = "fx-more-user";
-    who.textContent = user ? `${user.querySelector("strong")?.textContent || ""} · ${user.querySelector("small")?.textContent || ""}` : "";
-    tools.append(who);
+    const card = document.createElement("button"); card.type = "button"; card.className = "fx-more-profile";
+    const av = document.createElement("span"); av.className = "fx-more-avatar"; av.textContent = user?.querySelector(".avatar")?.textContent || "W";
+    const who = document.createElement("span"); who.className = "fx-more-who";
+    const nm = document.createElement("b"); nm.textContent = user?.querySelector("strong")?.textContent || "Профіль";
+    const rl = document.createElement("small"); rl.textContent = user?.querySelector("small")?.textContent || "";
+    who.append(nm, rl); card.append(av, who);
+    card.addEventListener("click", () => { sounds.nav(); close(); setTimeout(() => goPage("team"), 120); });
+    const row = document.createElement("div"); row.className = "fx-more-row";
+    const mk = (text, fn) => { const b = document.createElement("button"); b.type = "button"; b.textContent = text; b.addEventListener("click", fn); return b; };
+    const dark = document.documentElement.dataset.theme === "dark";
+    row.append(
+      mk(dark ? "Світла тема" : "Темна тема", () => { document.querySelector("#fx-theme")?.click(); close(); }),
+      mk(muted ? "Увімкнути звук" : "Вимкнути звук", () => { document.querySelector("#fx-sound")?.click(); close(); }),
+      mk("Вийти", () => { close(); setTimeout(() => document.querySelector('[data-action="logout"]')?.click(), 150); })
+    );
+    row.lastChild.classList.add("danger");
+    tools.append(card, row);
     sheet.append(grip, grid, tools);
     wrap.append(sheet);
     document.body.append(wrap);
