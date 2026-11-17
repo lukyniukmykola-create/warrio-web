@@ -68,8 +68,8 @@
       '<button class="nav-btn" data-page="stock" hidden><span class="ico" data-icon="box"></span><span>Склад</span></button>');
     $("#page-service")?.insertAdjacentHTML("afterend", `
       <section class="page" id="page-stock">
-        <div class="page-head"><div><h1>Склад</h1><p>Прийом товару за серійними номерами, наявність і повна історія кожного виробу.</p></div></div>
-        <p id="stock-msg" role="status" style="color:var(--muted);font-size:13px"></p>
+        <div class="page-head"><div><h1>Склад</h1><p>Прийом товару за серійними номерами, наявність і повна історія кожного виробу.</p></div><div class="actions"><button class="btn" id="stock-labels-open" type="button" title="Наклейки з QR для виробів, що зараз на складі">🏷 Наклейки зі складу (QR)</button></div></div>
+        <p id="stock-msg" role="status" style="display:none;margin:12px 0;padding:10px 14px;border-radius:10px;background:#fff4e5;color:#7a4b00;font-size:14px"></p>
         <div class="card settings-card" id="stock-receive-card"><h3>Прийняти товар</h3>
           <div class="form-grid">
             <div class="form-group"><label for="stock-model">Модель</label><select id="stock-model"></select></div>
@@ -89,7 +89,6 @@
           <div class="form-grid">
             <div class="form-group"><label for="stock-search">Пошук серійного номера</label><input id="stock-search" maxlength="64"></div>
             <div class="form-group"><label for="stock-filter">Статус</label><select id="stock-filter"><option value="">Усі</option><option value="in_stock">На складі</option><option value="sold">Продано</option><option value="in_service">У сервісі</option><option value="written_off">Списано</option></select></div>
-            <div class="form-group" style="align-self:end"><button class="btn" id="stock-labels-open" type="button">Друк наклейок з QR</button></div>
           </div>
         </div>
         <div class="card table-card" style="margin-top:18px"><div class="table-wrap"><table class="table"><thead><tr><th>Серійний номер</th><th>Модель</th><th>Прийнято</th><th>Статус</th><th>Дилер / гарантія</th><th></th></tr></thead><tbody id="stock-body"></tbody></table></div></div>
@@ -117,7 +116,7 @@
     });
   }
 
-  function message(text) { const el = $("#stock-msg"); if (el) el.textContent = text || ""; }
+  function message(text) { const el = $("#stock-msg"); if (!el) return; el.textContent = text || ""; el.style.display = text ? "block" : "none"; }
 
   async function loadModels() {
     const orgId = context()?.organization?.id;
@@ -210,7 +209,7 @@
   // The QR carries only the serial number (usable with any scanner and the search box).
   function openLabels() {
     const items = lastRows.filter(row => row.status === "in_stock");
-    if (!items.length) { message("Немає виробів «На складі» у поточному списку. Змініть фільтр чи пошук."); return; }
+    if (!items.length) { message("Немає що друкувати: у списку нема виробів зі статусом «На складі». Спершу прийміть товар (форма «Прийняти товар» вище), потім натисніть кнопку знову."); return; }
     if (!window.WarrioQR) { message("Модуль QR не завантажено."); return; }
     closeLabels();
     if (!$("#stock-print-style")) {
@@ -225,7 +224,7 @@
     const bar = document.createElement("div");
     bar.className = "no-print";
     bar.style.cssText = "position:sticky;top:0;background:#f4f6fb;border-bottom:1px solid #e4e7f0;padding:12px 18px;display:flex;gap:12px;align-items:center";
-    bar.innerHTML = `<b>Наклейки: ${items.length} шт.</b><span style="color:#68738c;font-size:13px">QR містить серійний номер. Друк: розмір паперу A4, без полів.</span>`;
+    bar.innerHTML = `<b>Наклейки: ${items.length} шт.</b><span style="color:#68738c;font-size:13px">Наклейки потрібні для складу: наклейте на коробку чи виріб, і серійник можна сканувати замість набору вручну. Для продажу вони не обов'язкові. Друк: A4, без полів.</span>`;
     const print = document.createElement("button");
     print.className = "btn primary";
     print.type = "button";
