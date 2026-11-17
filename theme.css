@@ -239,3 +239,70 @@ html[data-theme=dark] input[type=checkbox]:checked{background:var(--violet)!impo
 .fx-num,.stat strong,.status,.nav-badge,.trend,.attention-row b{font-family:"Warrio Sans",Inter,"Segoe UI",sans-serif!important;font-variant-numeric:tabular-nums;font-feature-settings:"tnum","cv11"}
 .fx-num{font-weight:500}
 .stat strong.fx-num,.stat strong{font-weight:600}
+
+/* ================= Mobile ================= */
+.fx-tabbar{display:none}
+@media(max-width:760px){
+ html,body{background:#f4f4f8!important}
+ body{padding:0!important}
+ .app{display:block!important;height:auto!important;min-height:100vh!important;border-radius:0!important;box-shadow:none!important;animation:none;padding-bottom:78px}
+ .main{height:auto!important;overflow:visible!important}
+ .sidebar{position:fixed!important;left:-310px!important;top:0!important;bottom:0;width:290px!important;height:100dvh!important;background:#fff!important;z-index:80!important;padding:20px 14px 14px!important;transition:left .3s var(--ease)!important;box-shadow:none;overflow-y:auto}
+ .sidebar.open{left:0!important;box-shadow:0 0 0 100vmax rgba(26,20,52,.45),20px 0 60px rgba(30,20,80,.25)!important}
+ .sidebar .brand span,.sidebar .menu-title,.sidebar .nav-btn span:not(.ico),.sidebar .nav-badge{display:inline-block!important}
+ .sidebar .menu-title{display:block!important}
+ .sidebar .nav-btn{min-height:46px!important;font-size:15px!important}
+ .topbar{height:auto!important;min-height:64px;padding:10px 14px!important;gap:10px!important;position:sticky;top:0;z-index:40;background:rgba(244,244,248,.92)!important;backdrop-filter:blur(14px)!important}
+ .mobile-menu{display:grid!important;place-items:center;width:44px;height:44px;border-radius:14px;background:#fff!important;font-size:20px}
+ .search{min-width:0;flex:1}
+ .search input{height:44px!important;font-size:16px!important}
+ .search kbd{display:none}
+ .top-actions{gap:8px!important}
+ .top-actions>.user,#fx-sound{display:none!important}
+ .icon-btn{width:44px;height:44px}
+ .workspace{padding:4px 14px 24px!important}
+ .page-head{flex-direction:column;align-items:flex-start!important;gap:12px}
+ .page-head h1{font-size:26px!important}
+ .page-head .actions{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+ .page-head .actions .btn{flex:1 1 auto;justify-content:center}
+ .grid,.stats,.dashboard-grid,.lower-grid,.report-grid,.two-col,.documents,.team-grid,.dealer-cards,.settings-grid,.activation-layout{grid-template-columns:1fr!important}
+ .stats{grid-template-columns:1fr 1fr!important;gap:10px!important}
+ .stat{grid-template-columns:1fr!important;padding:14px!important;gap:8px!important}
+ .stat .arrow{display:none}
+ .stat strong{font-size:26px!important}
+ .card{border-radius:20px!important}
+ .card,.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+ table{min-width:560px}
+ .quick{grid-template-columns:1fr 1fr!important}
+ .kanban{grid-template-columns:1fr!important}
+ input,select,textarea,.fx-sel-btn{font-size:16px!important;min-height:44px}
+ .btn{min-height:42px}
+ .overlay{place-items:end center!important;padding:0!important}
+ .modal,.modal.wide{width:100%!important;max-width:none!important;max-height:92dvh!important;border-radius:26px 26px 0 0!important}
+ .overlay.open .modal{animation:sheet .38s var(--ease) both}
+ @keyframes sheet{from{transform:translateY(100%)}to{transform:none}}
+ .drawer{top:0!important;height:100dvh!important;width:100%!important;border-radius:0!important;right:-100%!important}
+ .drawer.open{right:0!important}
+ .profile-menu{left:14px!important;bottom:84px!important}
+ .toast-wrap{left:12px;right:12px;bottom:86px}
+ .toast{min-width:0!important;width:100%}
+ .demo-pill{display:none}
+ #lang-switch,[id*="lang"][style*="fixed"]{bottom:88px!important}
+ .fx-tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:10px;right:10px;bottom:10px;z-index:60;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-radius:24px;box-shadow:0 12px 40px rgba(30,20,80,.22);padding:6px}
+ .fx-tabbar button{border:0;background:transparent;display:grid;gap:2px;place-items:center;padding:7px 2px;border-radius:18px;color:#7a7794;font-size:10.5px;font-weight:500;cursor:pointer;transition:background .2s,color .2s,transform .25s var(--spring)}
+ .fx-tabbar button svg{width:22px;height:22px}
+ .fx-tabbar button.on{background:var(--tint);color:#2a1f6b}
+ .fx-tabbar button:active{transform:scale(.9)}
+ .fx-tabbar button[hidden]{display:none}
+ html[data-theme=dark] .fx-tabbar{background:rgba(19,14,38,.94)}
+ html[data-theme=dark] .fx-tabbar button.on{background:var(--violet);color:#fff}
+ html[data-theme=dark] .sidebar{background:#0b0818!important}
+ html[data-theme=dark] body,html[data-theme=dark]{background:#05030c!important}
+}
+@media(max-width:380px){.stats{grid-template-columns:1fr!important}}
+@media(max-width:760px){
+ .fx-tabbar{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:1fr}
+ .sidebar .nav-badge{display:inline-flex!important;align-items:center;justify-content:center}
+}
+@media(max-width:760px){#lang-switch{left:auto!important;right:14px!important;bottom:92px!important;opacity:.92}}
+@media(max-width:760px){td:first-child{white-space:nowrap}table{min-width:620px}}

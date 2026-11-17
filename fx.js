@@ -277,7 +277,45 @@
     setInterval(poll, 45000);
   }
 
+  // Bottom tab bar on phones: the five things used most, plus the full menu.
+  function tabbar() {
+    if ($tab("#fx-tabbar")) return;
+    const defs = [["dashboard", "Огляд", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>'],
+      ["sales", "Продажі", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M3 4h2.5l2.2 10.5h10.6L20.5 8H6.5"/></svg>'],
+      ["warranties", "Гарантії", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/></svg>'],
+      ["service", "Сервіс", ICON.wrench], ["menu", "Ще", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>']];
+    const bar = document.createElement("nav");
+    bar.id = "fx-tabbar"; bar.className = "fx-tabbar";
+    for (const [page, label, icon] of defs) {
+      const b = document.createElement("button");
+      b.type = "button"; b.dataset.tab = page; b.innerHTML = `${icon}<span>${label}</span>`;
+      b.addEventListener("click", () => {
+        if (page === "menu") { document.querySelector("#sidebar")?.classList.toggle("open"); return; }
+        document.querySelector(`.nav-btn[data-page="${page}"]`)?.click();
+      });
+      bar.append(b);
+    }
+    document.body.append(bar);
+    const sync = () => {
+      const active = document.querySelector(".page.active")?.id?.replace("page-", "");
+      bar.querySelectorAll("button").forEach(b => {
+        b.classList.toggle("on", b.dataset.tab === active);
+        const nav = document.querySelector(`.nav-btn[data-page="${b.dataset.tab}"]`);
+        b.hidden = b.dataset.tab !== "menu" && (!nav || nav.hidden);
+      });
+    };
+    let busy = false, again = false;
+    const safe = () => { if (busy) { again = true; return; } busy = true; sync(); setTimeout(() => { busy = false; if (again) { again = false; safe(); } }, 120); };
+    new MutationObserver(safe).observe(document.body, { attributes: true, subtree: true, attributeFilter: ["class", "hidden"] });
+    sync();
+  }
+  const $tab = selector => document.querySelector(selector);
+  document.addEventListener("click", event => {
+    if (matchMedia("(max-width:760px)").matches && event.target.closest("#sidebar .nav-btn[data-page]")) document.querySelector("#sidebar")?.classList.remove("open");
+  });
+
   function start() {
+    tabbar();
     const host = document.querySelector(".top-actions");
     if (host) host.prepend(sound(), theme());
     restructure(); icons(); notifications();
