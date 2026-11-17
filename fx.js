@@ -414,8 +414,64 @@
       n.nodeValue = n.nodeValue.replace(EMOJI_RISK, "$&\uFE0E");
     }
   }
+  let tblQueued = false;
+  const queueTables = () => { if (!tblQueued) { tblQueued = true; requestAnimationFrame(() => { tblQueued = false; labelTables(); }); } };
   let symQueued = false;
   const queueSymbols = () => { if (!symQueued) { symQueued = true; requestAnimationFrame(() => { symQueued = false; plainSymbols(); }); } };
+
+
+  // ---- Glass pass: sliding lens in the desktop menu, table rows as cards on phones, swipe-down modals ----
+  function labelTables() {
+    document.querySelectorAll(".page table").forEach(table => {
+      const heads = [...table.querySelectorAll("thead th")].map(th => th.textContent.trim());
+      if (!heads.length) return;
+      table.classList.add("fx-cards");
+      table.querySelectorAll("tbody tr").forEach(row => {
+        const cells = [...row.children];
+        if (cells.length !== heads.length) return;
+        cells.forEach((cell, i) => { if (cell.dataset.label !== heads[i]) cell.dataset.label = heads[i]; });
+      });
+    });
+  }
+
+  function navLens() {
+    const sidebar = document.querySelector(".sidebar");
+    if (!sidebar || sidebar.querySelector(".fx-navlens")) return;
+    const lens = document.createElement("i");
+    lens.className = "fx-navlens";
+    sidebar.prepend(lens);
+    const place = () => {
+      const active = sidebar.querySelector(".nav-btn.active:not([hidden])");
+      if (!active || matchMedia("(max-width:760px)").matches) { lens.style.opacity = "0"; return; }
+      const s = sidebar.getBoundingClientRect(), r = active.getBoundingClientRect();
+      lens.style.opacity = "1";
+      lens.style.height = `${r.height}px`; lens.style.width = `${r.width}px`;
+      lens.style.transform = `translate(${r.left - s.left}px,${r.top - s.top + sidebar.scrollTop}px)`;
+      lens.classList.add("ready");
+    };
+    let q = false;
+    const queue = () => { if (!q) { q = true; requestAnimationFrame(() => { q = false; place(); }); } };
+    new MutationObserver(queue).observe(sidebar, { attributes: true, subtree: true, attributeFilter: ["class", "hidden"] });
+    addEventListener("resize", queue);
+    sidebar.addEventListener("scroll", queue, { passive: true });
+    setTimeout(place, 300); setTimeout(place, 1200);
+  }
+
+  function modalSwipe() {
+    const overlay = document.querySelector("#modal-overlay"), modal = document.querySelector("#modal");
+    if (!overlay || !modal) return;
+    let y0 = null, dy = 0;
+    modal.addEventListener("touchstart", e => {
+      if (!matchMedia("(max-width:760px)").matches || !e.target.closest(".modal-head")) return;
+      y0 = e.touches[0].clientY; dy = 0; modal.style.transition = "none";
+    }, { passive: true });
+    modal.addEventListener("touchmove", e => { if (y0 === null) return; dy = Math.max(0, e.touches[0].clientY - y0); modal.style.transform = `translateY(${dy}px)`; }, { passive: true });
+    modal.addEventListener("touchend", () => {
+      if (y0 === null) return;
+      modal.style.transition = ""; modal.style.transform = ""; y0 = null;
+      if (dy > 90) document.querySelector("#modal-close")?.click();
+    });
+  }
 
   // Bottom tab bar on phones: the five things used most, plus the full menu.
   function tabbar() {
@@ -509,8 +565,8 @@
     if (host) host.prepend(sound(), theme());
     restructure(); icons(); notifications();
     document.querySelectorAll("select").forEach(enhanceSelect);
-    watch(); scan(); numbers(); plainSymbols();
-    new MutationObserver(() => { scan(); queueNumbers(); queueSymbols(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
+    watch(); scan(); numbers(); plainSymbols(); labelTables(); navLens(); modalSwipe();
+    new MutationObserver(() => { scan(); queueNumbers(); queueSymbols(); queueTables(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
       .observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
