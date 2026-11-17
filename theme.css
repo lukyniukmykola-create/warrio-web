@@ -527,3 +527,7 @@ html[data-theme=dark] tbody tr:hover{background:rgba(255,255,255,.06)!important}
  .flow-label{font-size:13px}
  .toast-wrap{pointer-events:none}.toast{pointer-events:auto}
 }
+
+/* Space between the top bar and the page title */
+.page-head{margin-top:22px!important}
+@media(max-width:760px){.page-head{margin-top:20px!important}}
