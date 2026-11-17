@@ -1,0 +1,61 @@
+/* Warrio "Soft Lilac" skin: floating rounded cards on a grey-violet backdrop, fast springy motion. */
+:root{--bg:#eceef3;--ink:#17142b;--muted:#77748c;--line:#e5e3ef;--violet:#6a52f5;--violet2:#8a76ff;--soft:#ece8ff;--tint:#e4defc;--night:#1d1736;--r:22px;--spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.22,1,.36,1)}
+html,body{background:radial-gradient(900px 520px at 8% -8%,#dcd6fb 0,transparent 60%),radial-gradient(800px 520px at 100% 108%,#d7dcf3 0,transparent 60%),#e9ebf1!important;color:var(--ink)}
+body{padding:28px!important}
+.app{max-width:1520px!important;border:0!important;border-radius:30px!important;background:#f4f4f8!important;box-shadow:0 40px 110px rgba(52,40,110,.18),0 2px 0 rgba(255,255,255,.8) inset!important;animation:app-in .6s var(--ease) both}
+@keyframes app-in{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+.sidebar{height:calc(100vh - 56px)!important;overflow-y:auto;background:transparent!important;border-right:1px solid rgba(23,20,43,.06)!important;backdrop-filter:none!important;padding:22px 14px 16px!important}
+.brand{color:var(--ink)}
+.menu-title{color:#a29fb8!important;letter-spacing:.12em!important}
+.nav-btn{border-radius:14px!important;color:#6b6883!important;min-height:44px!important;transition:background .15s,color .15s,transform .25s var(--spring)!important}
+.nav-btn:hover{background:rgba(106,82,245,.07)!important;color:var(--ink)!important;transform:translateX(3px)}
+.nav-btn.active{background:var(--tint)!important;color:#2a1f6b!important;box-shadow:none!important}
+.nav-btn.active .ico{color:var(--violet)}
+.nav-badge{background:var(--night)!important;color:#fff!important;border-radius:999px!important}
+.sync-card{background:var(--night)!important;color:#fff!important;border:0!important;border-radius:18px!important;padding:14px!important}
+.sync-card span{color:#bdb6e4!important}
+.topbar{background:transparent!important;border-bottom:0!important;backdrop-filter:none!important;height:74px!important;padding:0 24px!important}
+.search input{background:#fff!important;border:1px solid var(--line)!important;border-radius:16px!important;transition:box-shadow .2s,border-color .2s}
+.search input:focus{outline:0;border-color:var(--violet2)!important;box-shadow:0 0 0 4px rgba(106,82,245,.12)}
+.icon-btn,.user{background:#fff!important;border-radius:16px!important;box-shadow:0 1px 0 rgba(23,20,43,.04)}
+.workspace{padding:6px 24px 32px!important}
+.page-head h1{font-size:34px!important;letter-spacing:-.025em;font-weight:700}
+.card{background:#fff!important;border:0!important;border-radius:var(--r)!important;box-shadow:0 1px 2px rgba(40,30,90,.04),0 10px 30px rgba(40,30,90,.05)!important;transition:transform .3s var(--spring),box-shadow .25s}
+.card:hover{box-shadow:0 2px 4px rgba(40,30,90,.05),0 16px 40px rgba(40,30,90,.09)!important}
+.grid{gap:14px!important}.stats{gap:14px!important}
+.stat{padding:20px!important;border-radius:var(--r)!important}
+.stat:hover{transform:translateY(-3px)}
+.stats .stat:nth-child(1){background:var(--tint)!important}
+.stats .stat:nth-child(3){background:var(--night)!important;color:#fff}
+.stats .stat:nth-child(3) small,.stats .stat:nth-child(3) .trend{color:#c9c2ee!important}
+.stats .stat:nth-child(3) .stat-icon{background:rgba(255,255,255,.12)!important;color:#fff}
+.stat-icon{border-radius:14px!important;background:var(--soft)!important}
+.stat strong{font-size:32px!important;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.btn{border-radius:999px!important;border:1px solid var(--line)!important;padding:10px 18px!important;font-weight:600;transition:transform .25s var(--spring),box-shadow .2s,background .15s!important}
+.btn:hover{transform:translateY(-2px) scale(1.02)}
+.btn:active{transform:scale(.95)}
+.btn.primary,.btn.dark{background:var(--night)!important;color:#fff!important;border-color:var(--night)!important}
+.btn.primary:hover{background:#2b2150!important;box-shadow:0 10px 24px rgba(29,23,54,.28)!important}
+.quick-btn,.attention-row{border-radius:18px!important;transition:transform .25s var(--spring),background .15s!important}
+.quick-btn:hover,.attention-row:hover{transform:translateY(-3px) scale(1.01);background:var(--soft)!important}
+table th{color:#9b98b0}
+tbody tr{transition:background .12s}tbody tr:hover{background:#f7f5ff}
+.kanban-col{background:#f1f0f8!important;border-radius:20px!important}
+.overlay{background:rgba(26,20,52,.38)!important;backdrop-filter:blur(8px)!important;transition:opacity .18s}
+.modal{border-radius:26px!important;box-shadow:0 40px 100px rgba(30,20,80,.35)!important}
+.overlay.open .modal{animation:pop .32s var(--spring) both}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
+.toast{background:var(--night)!important;border-radius:18px!important;animation:toast-in .38s var(--spring) both!important}
+@keyframes toast-in{from{opacity:0;transform:translateY(16px) scale(.9)}to{opacity:1;transform:none}}
+.page.active>*{animation:rise .38s var(--ease) both}
+.page.active>*:nth-child(2){animation-delay:.04s}.page.active>*:nth-child(3){animation-delay:.08s}.page.active>*:nth-child(4){animation-delay:.12s}.page.active>*:nth-child(5){animation-delay:.16s}
+.page.active .stats .stat{animation:rise .42s var(--spring) both}
+.page.active .stats .stat:nth-child(2){animation-delay:.05s}.page.active .stats .stat:nth-child(3){animation-delay:.1s}.page.active .stats .stat:nth-child(4){animation-delay:.15s}
+@keyframes rise{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+.fx-ripple{position:absolute;border-radius:50%;background:rgba(106,82,245,.22);transform:scale(0);animation:ripple .55s var(--ease) forwards;pointer-events:none}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+.btn,.nav-btn,.quick-btn{position:relative;overflow:hidden}
+#fx-sound{width:44px;height:44px;border-radius:16px;border:0;background:#fff;box-shadow:0 1px 0 rgba(23,20,43,.04);cursor:pointer;font-size:17px;transition:transform .25s var(--spring)}
+#fx-sound:hover{transform:scale(1.1)}#fx-sound:active{transform:scale(.9)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(max-width:1150px){body{padding:0!important}.app{border-radius:0!important}}
