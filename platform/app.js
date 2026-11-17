@@ -27,8 +27,8 @@
       slug.textContent = item.slug;
       name.append(slug);
       cell(tr, date(item.created_at));
-      cell(tr, String(item.members));
-      cell(tr, String(item.dealers));
+      cell(tr, item.max_members ? `${item.members} / ${item.max_members}` : String(item.members));
+      cell(tr, item.max_dealers !== undefined ? `${item.dealers} / ${item.max_dealers}` : String(item.dealers));
       cell(tr, String(item.sales));
       cell(tr, String(item.warranties));
       cell(tr, String(item.open_service_requests));
