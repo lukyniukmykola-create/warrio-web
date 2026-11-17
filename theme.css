@@ -552,22 +552,22 @@ html[data-theme=dark] .kanban-head h3{color:var(--ink)!important}
 
 /* ===== First-visit splash (slow and sequential: logo, then name, then tagline) ===== */
 #warrio-intro{display:none}
-html.intro #warrio-intro{display:flex;position:fixed;inset:0;z-index:2147483600;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:radial-gradient(90% 70% at 50% 38%,#6a52f5 0%,#2d2170 48%,#110d2b 100%);color:#fff;overflow:hidden;cursor:pointer;transition:opacity 1s ease,transform 1.1s cubic-bezier(.3,.7,.3,1),filter 1s}
+html.intro #warrio-intro{display:flex;position:fixed;inset:0;z-index:2147483600;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:radial-gradient(90% 70% at 50% 38%,#6a52f5 0%,#2d2170 48%,#110d2b 100%);color:#fff;overflow:hidden;cursor:pointer;transition:opacity .9s ease,transform .9s cubic-bezier(.3,.7,.3,1),filter .9s}
 html.intro #warrio-intro.out{opacity:0;transform:scale(1.06);filter:blur(8px);pointer-events:none}
 .wi-orb{position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(139,116,255,.5),transparent 65%);filter:blur(24px);opacity:0;animation:wiOrbIn 1.6s ease both .1s,wiOrb 6s ease-in-out infinite alternate .1s}
 @keyframes wiOrbIn{to{opacity:1}}
 @keyframes wiOrb{from{transform:translate(-50px,-60px) scale(.92)}to{transform:translate(50px,50px) scale(1.12)}}
 .wi-mark{position:relative;width:104px;height:104px;margin-bottom:26px;display:grid;place-items:center}
-.wi-mark:before,.wi-mark:after{content:"";position:absolute;inset:0;border-radius:32px;border:2px solid rgba(255,255,255,.35);opacity:0;animation:wiRing 3.2s ease-out infinite 2s}
-.wi-mark:after{animation-delay:3.2s}
+.wi-mark:before,.wi-mark:after{content:"";position:absolute;inset:0;border-radius:32px;border:2px solid rgba(255,255,255,.35);opacity:0;animation:wiRing 2.6s ease-out infinite 1.2s}
+.wi-mark:after{animation-delay:2.5s}
 @keyframes wiRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(2);opacity:0}}
-.wi-mark .logo{width:96px!important;height:96px!important;border-radius:30px!important;box-shadow:0 20px 60px rgba(106,82,245,.6),inset 0 2px 0 rgba(255,255,255,.4);opacity:0;animation:wiPop 1.5s cubic-bezier(.22,1.15,.36,1) both .5s,wiFloat 4s ease-in-out infinite 2s}
+.wi-mark .logo{width:96px!important;height:96px!important;border-radius:30px!important;box-shadow:0 20px 60px rgba(106,82,245,.6),inset 0 2px 0 rgba(255,255,255,.4);opacity:0;animation:wiPop 1.1s cubic-bezier(.22,1.15,.36,1) both .15s,wiFloat 4s ease-in-out infinite 1.3s}
 @keyframes wiPop{0%{transform:scale(.4) rotate(-30deg);opacity:0;filter:blur(10px)}100%{transform:scale(1) rotate(0);opacity:1;filter:none}}
 @keyframes wiFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .wi-word{display:flex;font-size:46px;font-weight:700;letter-spacing:-.025em;line-height:1}
-.wi-word span{display:inline-block;opacity:0;animation:wiLetter 1s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(2.1s + var(--i)*.14s)}
+.wi-word span{display:inline-block;opacity:0;animation:wiLetter .8s cubic-bezier(.2,.8,.3,1) both;animation-delay:calc(.95s + var(--i)*.09s)}
 @keyframes wiLetter{from{opacity:0;transform:translateY(20px);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
-.wi-sub{margin:12px 0 0;font-size:15px;letter-spacing:.08em;color:rgba(255,255,255,.75);opacity:0;animation:wiFade 1.2s ease both 3.5s}
+.wi-sub{margin:12px 0 0;font-size:15px;letter-spacing:.08em;color:rgba(255,255,255,.75);opacity:0;animation:wiFade .9s ease both 1.9s}
 @keyframes wiFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* ===== Login on phones ===== */
@@ -610,3 +610,16 @@ html.intro #warrio-intro.out{opacity:0;transform:scale(1.06);filter:blur(8px);po
 /* Hotfix: the login screen must disappear once signed in */
 .auth-gate[hidden],.auth-gate[hidden] *{display:none!important}
 .auth-gate[hidden]:before,.auth-gate[hidden]:after{display:none!important}
+
+/* ===== App reveal: content flows in instead of snapping on ===== */
+@keyframes appUp{from{opacity:0;transform:translateY(26px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes appDown{from{opacity:0;transform:translateY(-22px)}to{opacity:1;transform:none}}
+@keyframes appLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:none}}
+@keyframes appTab{from{opacity:0;transform:translate(-50%,120%) scale(.9)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes appTabD{from{opacity:0;transform:translateY(120%) scale(.9)}to{opacity:1;transform:none}}
+html.app-in .topbar{animation:appDown .8s cubic-bezier(.2,.9,.3,1) both!important}
+html.app-in .sidebar{animation:appLeft .9s cubic-bezier(.2,.9,.3,1) both!important}
+html.app-in .page.active .page-head{animation:appUp .8s cubic-bezier(.2,.9,.3,1) .12s both!important}
+html.app-in .page.active :is(.card,.stat,.metric,.job,.dealer,.kanban-col){animation:appUp .85s cubic-bezier(.2,.9,.3,1) calc(.22s + var(--ai,0)*.07s) both!important}
+html.app-in .fx-tabbar{animation:appTab 1s cubic-bezier(.3,1.25,.5,1) .45s both!important}
+@media(prefers-reduced-motion:reduce){html.app-in *{animation:none!important}}
