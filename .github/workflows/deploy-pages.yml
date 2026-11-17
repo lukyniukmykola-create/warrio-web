@@ -37,6 +37,7 @@ jobs:
           node --check auth-ui.js
           node --check activate/app.js
           node --check service/app.js
+          node --check platform/app.js
           test -f service/index.html
           node --check verify/app.js
           if grep -RIE --include='*.js' --include='*.html' --include='*.json' \
