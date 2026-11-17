@@ -624,10 +624,8 @@ html.app-in .page.active :is(.card,.stat,.metric,.job,.dealer,.kanban-col){anima
 html.app-in .fx-tabbar{animation:appTab 1s cubic-bezier(.3,1.25,.5,1) .45s both!important}
 @media(prefers-reduced-motion:reduce){html.app-in *{animation:none!important}}
 
-/* ===== Attention rows: soft violet instead of a white frame ===== */
-.attention-row{background:linear-gradient(180deg,rgba(122,96,255,.11),rgba(122,96,255,.05))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 0 0 1px rgba(106,82,245,.14)!important}
-.attention-row.hot{background:linear-gradient(180deg,rgba(122,96,255,.2),rgba(122,96,255,.1))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.55),0 0 0 1px rgba(106,82,245,.28),0 6px 18px rgba(106,82,245,.12)!important}
-html[data-theme=dark] .attention-row{background:linear-gradient(180deg,rgba(140,116,255,.16),rgba(140,116,255,.07))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.1),0 0 0 1px rgba(160,140,255,.16)!important}
+/* ===== Attention rows: only rows that need attention get a soft violet glow ===== */
+.attention-row.hot{background:linear-gradient(180deg,rgba(122,96,255,.2),rgba(122,96,255,.1))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.5),0 0 0 1px rgba(106,82,245,.3),0 6px 18px rgba(106,82,245,.14)!important}
 html[data-theme=dark] .attention-row.hot{background:linear-gradient(180deg,rgba(140,116,255,.3),rgba(140,116,255,.14))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14),0 0 0 1px rgba(170,150,255,.34),0 6px 20px rgba(106,82,245,.25)!important}
 
 /* ===== Quick actions: same type as the rest of the cards ===== */
