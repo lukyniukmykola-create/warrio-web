@@ -60,6 +60,8 @@
     return result;
   }
 
+  let lastRows = [];
+
   function injectPage() {
     if ($("#page-stock")) return;
     document.querySelector('.nav-btn[data-page="service"]')?.insertAdjacentHTML("afterend",
@@ -87,6 +89,7 @@
           <div class="form-grid">
             <div class="form-group"><label for="stock-search">Пошук серійного номера</label><input id="stock-search" maxlength="64"></div>
             <div class="form-group"><label for="stock-filter">Статус</label><select id="stock-filter"><option value="">Усі</option><option value="in_stock">На складі</option><option value="sold">Продано</option><option value="in_service">У сервісі</option><option value="written_off">Списано</option></select></div>
+            <div class="form-group" style="align-self:end"><button class="btn" id="stock-labels-open" type="button">Друк наклейок з QR</button></div>
           </div>
         </div>
         <div class="card table-card" style="margin-top:18px"><div class="table-wrap"><table class="table"><thead><tr><th>Серійний номер</th><th>Модель</th><th>Прийнято</th><th>Статус</th><th>Дилер / гарантія</th><th></th></tr></thead><tbody id="stock-body"></tbody></table></div></div>
@@ -99,9 +102,10 @@
       </section>`);
     $("#stock-receive").addEventListener("click", receive);
     $("#stock-file").addEventListener("change", readFile);
+    $("#stock-labels-open").addEventListener("click", openLabels);
     $("#stock-history-close").addEventListener("click", closeHistory);
     $("#stock-history").addEventListener("click", event => { if (event.target.id === "stock-history") closeHistory(); });
-    document.addEventListener("keydown", event => { if (event.key === "Escape") closeHistory(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") { closeHistory(); closeLabels(); } });
     $("#stock-filter").addEventListener("change", loadList);
     let timer;
     $("#stock-search").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(loadList, 300); });
@@ -132,6 +136,7 @@
         p_status: $("#stock-filter").value || null,
         p_limit: 200
       });
+      lastRows = rows || [];
       const isAdmin = ["owner", "admin"].includes(ctx.membership?.role);
       $("#stock-receive-card").hidden = !isAdmin;
       $("#stock-body").innerHTML = (rows || []).map(row => {
@@ -198,6 +203,65 @@
     } catch (error) { message(errorText(error)); }
     finally { button.disabled = false; }
   }
+
+
+  // Printable QR labels for items currently shown with status "in stock".
+  // The QR carries only the serial number (usable with any scanner and the search box).
+  function openLabels() {
+    const items = lastRows.filter(row => row.status === "in_stock");
+    if (!items.length) { message("Немає виробів «На складі» у поточному списку. Змініть фільтр чи пошук."); return; }
+    if (!window.WarrioQR) { message("Модуль QR не завантажено."); return; }
+    closeLabels();
+    if (!$("#stock-print-style")) {
+      const style = document.createElement("style");
+      style.id = "stock-print-style";
+      style.textContent = "@media print{body>*:not(#stock-labels){display:none!important}#stock-labels{position:static!important;overflow:visible!important}#stock-labels .no-print{display:none!important}#stock-labels .label-grid{padding:0!important}}";
+      document.head.appendChild(style);
+    }
+    const overlay = document.createElement("div");
+    overlay.id = "stock-labels";
+    overlay.style.cssText = "position:fixed;inset:0;z-index:1100;background:#fff;overflow:auto;color:#000";
+    const bar = document.createElement("div");
+    bar.className = "no-print";
+    bar.style.cssText = "position:sticky;top:0;background:#f4f6fb;border-bottom:1px solid #e4e7f0;padding:12px 18px;display:flex;gap:12px;align-items:center";
+    bar.innerHTML = `<b>Наклейки: ${items.length} шт.</b><span style="color:#68738c;font-size:13px">QR містить серійний номер. Друк: розмір паперу A4, без полів.</span>`;
+    const print = document.createElement("button");
+    print.className = "btn primary";
+    print.type = "button";
+    print.textContent = "Друк";
+    print.style.marginLeft = "auto";
+    print.addEventListener("click", () => window.print());
+    const close = document.createElement("button");
+    close.className = "btn";
+    close.type = "button";
+    close.textContent = "Закрити";
+    close.addEventListener("click", closeLabels);
+    bar.append(print, close);
+    const grid = document.createElement("div");
+    grid.className = "label-grid";
+    grid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(52mm,1fr));gap:3mm;padding:16px";
+    for (const row of items) {
+      const cell = document.createElement("div");
+      cell.style.cssText = "border:1px dashed #999;padding:2mm;display:flex;gap:2mm;align-items:center;break-inside:avoid;min-height:26mm";
+      const qr = document.createElement("div");
+      qr.style.cssText = "width:22mm;height:22mm;flex:none";
+      qr.innerHTML = window.WarrioQR.svg(row.serial_number, 4, 1).replace(/width="\d+" height="\d+"/, 'width="100%" height="100%"');
+      const text = document.createElement("div");
+      text.style.cssText = "font:600 11px/1.3 Consolas,monospace;word-break:break-all";
+      const serial = document.createElement("div");
+      serial.textContent = row.serial_number;
+      const model = document.createElement("div");
+      model.style.cssText = "font:400 10px/1.3 Arial,sans-serif;color:#333;margin-top:1mm";
+      model.textContent = row.model_name;
+      text.append(serial, model);
+      cell.append(qr, text);
+      grid.append(cell);
+    }
+    overlay.append(bar, grid);
+    document.body.appendChild(overlay);
+  }
+
+  function closeLabels() { $("#stock-labels")?.remove(); }
 
   function closeHistory() {
     const modal = $("#stock-history");
