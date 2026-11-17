@@ -56,12 +56,14 @@
     if (!orgId) { message("Сервісні звернення доступні після входу в робочий простір."); return; }
     const filter = { organization_id: `eq.${orgId}` };
     try {
-      const [requests, warranties, sales] = await Promise.all([
+      const [requests, warranties, sales, products] = await Promise.all([
         window.WarrioData.queryAll("service_requests", { select: "id,warranty_id,status,title,description,resolution,photo_links,contact_note,source,is_warranty_case,created_at,closed_at", ...filter, order: "created_at.desc" }),
         window.WarrioData.queryAll("warranties", { select: "id,warranty_number,sale_id", ...filter, order: "created_at.desc" }),
-        window.WarrioData.queryAll("sales", { select: "id,serial_number", ...filter, order: "created_at.desc" })
+        window.WarrioData.queryAll("sales", { select: "id,product_id", ...filter, order: "created_at.desc" }),
+        window.WarrioData.queryAll("products", { select: "id,serial_number", ...filter, order: "created_at.desc" })
       ]);
-      const serial = new Map(sales.map(sale => [sale.id, sale.serial_number]));
+      const productSerial = new Map(products.map(product => [product.id, product.serial_number]));
+      const serial = new Map(sales.map(sale => [sale.id, productSerial.get(sale.product_id)]));
       const label = new Map(warranties.map(w => [w.id, `${serial.get(w.sale_id) || "—"} · ${w.warranty_number}`]));
       document.querySelector("#service-warranty").innerHTML = warranties.map(w => `<option value="${esc(w.id)}">${esc(label.get(w.id))}</option>`).join("");
       document.querySelector("#service-form-card").hidden = !["owner", "admin", "dealer", "service_manager"].includes(ctx.membership?.role);
