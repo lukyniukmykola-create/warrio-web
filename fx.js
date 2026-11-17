@@ -192,6 +192,19 @@
     setInterval(() => { if (!list) label(); }, 700);
   }
 
+  // Text stays in the system font; numbers, percents, dates and badges use Inter.
+  const NUM = /^[\s\d.,:%+\-–↗↘/₴$€]+$/;
+  let numQueued = false;
+  function numbers() {
+    numQueued = false;
+    document.querySelectorAll(".stat strong,.status,.nav-badge,.trend,.attention-row b,time,td,th,.card-head b,small,b,strong,span").forEach(el => {
+      if (el.children.length || el.classList.contains("fx-num")) return;
+      const text = el.textContent.trim();
+      if (text && text.length < 24 && /\d/.test(text) && (NUM.test(text) || el.matches(".status,.nav-badge,.trend"))) el.classList.add("fx-num");
+    });
+  }
+  const queueNumbers = () => { if (!numQueued) { numQueued = true; requestAnimationFrame(numbers); } };
+
   function restructure() {
     const user = document.querySelector("#user-menu");
     const bottom = document.querySelector(".sidebar-bottom");
@@ -266,11 +279,11 @@
 
   function start() {
     const host = document.querySelector(".top-actions");
-    if (host) host.prepend(fontPicker(), sound(), theme());
+    if (host) host.prepend(sound(), theme());
     restructure(); icons(); notifications();
     document.querySelectorAll("select").forEach(enhanceSelect);
-    watch(); scan();
-    new MutationObserver(() => { scan(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
+    watch(); scan(); numbers();
+    new MutationObserver(() => { scan(); queueNumbers(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
       .observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
