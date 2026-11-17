@@ -149,11 +149,32 @@
     } catch { card.hidden = true; /* migration 014 not applied yet */ }
   }
 
+  // Badge on the nav button: number of new (unhandled) requests. Refreshes while the cabinet is open.
+  async function refreshBadge() {
+    const ctx = context();
+    const button = document.querySelector('.nav-btn[data-page="service"]');
+    if (!button || button.hidden || !ctx?.organization?.id) return;
+    try {
+      const rows = await window.WarrioData.query("service_requests", { select: "id", organization_id: `eq.${ctx.organization.id}`, status: "eq.new", limit: 100 });
+      let dot = button.querySelector(".service-badge");
+      if (!rows?.length) { dot?.remove(); return; }
+      if (!dot) {
+        dot = document.createElement("b");
+        dot.className = "service-badge";
+        dot.style.cssText = "margin-left:auto;background:#e5484d;color:#fff;border-radius:999px;padding:1px 7px;font-size:11px";
+        button.append(dot);
+      }
+      dot.textContent = rows.length >= 100 ? "99+" : String(rows.length);
+    } catch { /* module not activated or no access */ }
+  }
+  setTimeout(refreshBadge, 4000);
+  setInterval(refreshBadge, 60000);
+
   injectPage();
   document.addEventListener("click", event => {
     const nav = event.target.closest(".nav-btn[data-page]");
     if (!nav) return;
-    if (nav.dataset.page === "service") load();
+    if (nav.dataset.page === "service") load().then(refreshBadge);
     if (nav.dataset.page === "settings") renderRoleSwitch();
   });
 })();
