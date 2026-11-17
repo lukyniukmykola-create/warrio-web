@@ -143,9 +143,10 @@
         const [label, css] = STATUS[row.status] || [row.status, "violet"];
         const extra = [row.dealer, row.warranty_number].filter(Boolean).map(esc).join(" · ") || "—";
         const service = row.open_service_requests > 0 ? `<small style="display:block">Відкритих звернень: ${esc(row.open_service_requests)}</small>` : "";
+        const repeat = row.total_service_requests >= 2 ? `<small style="display:block;color:#b42318;font-weight:600">Повторні звернення: ${esc(row.total_service_requests)}</small>` : "";
         const off = isAdmin && row.status === "in_stock" ? `<button class="btn small" type="button" data-stock-writeoff="${esc(row.product_id)}">Списати</button> ` : "";
         return `<tr><td class="mono"><b>${esc(row.serial_number)}</b></td><td>${esc(row.model_name)}<small style="display:block;color:var(--muted)">${esc(row.model_code)}</small></td>
-          <td>${esc(dateText(row.received_at))}</td><td><span class="status ${css}">${esc(label)}</span>${service}</td><td>${extra}</td>
+          <td>${esc(dateText(row.received_at))}</td><td><span class="status ${css}">${esc(label)}</span>${service}${repeat}</td><td>${extra}</td>
           <td>${off}<button class="btn small" type="button" data-stock-history="${esc(row.product_id)}" data-serial="${esc(row.serial_number)}">Історія</button></td></tr>`;
       }).join("") || '<tr><td colspan="6" class="empty">Нічого не знайдено</td></tr>';
       message("");
