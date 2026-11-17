@@ -306,3 +306,5 @@ html[data-theme=dark] input[type=checkbox]:checked{background:var(--violet)!impo
 }
 @media(max-width:760px){#lang-switch{left:auto!important;right:14px!important;bottom:92px!important;opacity:.92}}
 @media(max-width:760px){td:first-child{white-space:nowrap}table{min-width:620px}}
+
+@media(max-width:760px){.fx-tabbar{bottom:calc(10px + env(safe-area-inset-bottom))!important}.app{padding-bottom:calc(86px + env(safe-area-inset-bottom))!important}.toast-wrap{bottom:calc(92px + env(safe-area-inset-bottom))!important}#lang-switch{bottom:calc(96px + env(safe-area-inset-bottom))!important}}
