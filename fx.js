@@ -133,6 +133,17 @@
     return b;
   }
 
+  function fontPicker() {
+    const sel = document.createElement("select");
+    sel.id = "fx-font"; sel.title = "Шрифт";
+    [["system", "Шрифт: Segoe UI"], ["inter", "Шрифт: Inter"], ["display", "Шрифт: Inter Display"], ["carlito", "Шрифт: Carlito"]].forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.append(o); });
+    let cur = "system"; try { cur = localStorage.getItem("warrio-font") || "system"; } catch { /* ignore */ }
+    const apply = v => { if (v === "system") delete document.documentElement.dataset.font; else document.documentElement.dataset.font = v; };
+    sel.value = cur; apply(cur);
+    sel.addEventListener("change", () => { apply(sel.value); try { localStorage.setItem("warrio-font", sel.value); } catch { /* ignore */ } });
+    return sel;
+  }
+
   // Custom drop-down that replaces the grey system list. The real <select> stays in the page and keeps the value.
   function enhanceSelect(select) {
     if (select.dataset.fx || select.multiple || select.size > 1 || select.closest(".fx-select")) return;
@@ -255,7 +266,7 @@
 
   function start() {
     const host = document.querySelector(".top-actions");
-    if (host) host.prepend(sound(), theme());
+    if (host) host.prepend(fontPicker(), sound(), theme());
     restructure(); icons(); notifications();
     document.querySelectorAll("select").forEach(enhanceSelect);
     watch(); scan();
