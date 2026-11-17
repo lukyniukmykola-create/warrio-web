@@ -209,10 +209,45 @@
     } catch (error) { message(errorText(error)); }
   }
 
+  // ---- owner setting: who manages stock / who sees service requests ----
+  async function renderAccessCard() {
+    const ctx = context();
+    const grid = document.querySelector("#page-settings .settings-grid");
+    if (!grid || ctx?.membership?.role !== "owner" || !ctx.organization?.id) return;
+    let card = $("#access-card");
+    if (!card) {
+      grid.insertAdjacentHTML("beforeend", `<div class="card settings-card" id="access-card" hidden><h3>Доступ до складу й сервісу</h3>
+        <p>Власник завжди має повний доступ. Тут можна обмежити решту ролей.</p>
+        <label class="switch-row"><span><b>Адміністратори керують складом</b><small>Якщо вимкнути, склад бачить і змінює лише власник.</small></span><input type="checkbox" id="access-admins"></label>
+        <label class="switch-row"><span><b>Дилери бачать звернення по своїх продажах</b><small id="access-msg"></small></span><input type="checkbox" id="access-dealers"></label></div>`);
+      card = $("#access-card");
+      const save = async event => {
+        const box = event.target;
+        try {
+          await window.WarrioData.rpc("set_warrio_access_settings", {
+            p_organization_id: context().organization.id,
+            p_admins_manage_stock: $("#access-admins").checked,
+            p_dealers_see_service: $("#access-dealers").checked
+          });
+          $("#access-msg").textContent = "Збережено.";
+        } catch (error) { box.checked = !box.checked; $("#access-msg").textContent = errorText(error); }
+      };
+      $("#access-admins").addEventListener("change", save);
+      $("#access-dealers").addEventListener("change", save);
+    }
+    try {
+      const rows = await window.WarrioData.query("organizations", { select: "admins_manage_stock,dealers_see_service", id: `eq.${ctx.organization.id}`, limit: 1 });
+      $("#access-admins").checked = rows?.[0]?.admins_manage_stock !== false;
+      $("#access-dealers").checked = rows?.[0]?.dealers_see_service !== false;
+      card.hidden = false;
+    } catch { card.hidden = true; /* migration 021 not applied yet */ }
+  }
+
   injectPage();
   document.addEventListener("click", event => {
     const nav = event.target.closest(".nav-btn[data-page]");
     if (nav?.dataset.page === "stock") load();
+    if (nav?.dataset.page === "settings") renderAccessCard();
   });
   window.WarrioStock = { parseSerials };
 })();

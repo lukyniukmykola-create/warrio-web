@@ -57,6 +57,8 @@
     "Перевірити SN": "Check SN", "Перевірити код": "Check code", "Продаж знайдено": "Sale found", "Готово": "Done", "Історія гарантії": "Warranty history",
     "Гарантію підтверджено": "Warranty confirmed", "Номер гарантії": "Warranty number", "Статус гарантії": "Warranty status", "Модель обладнання": "Equipment model",
     "Перевірка гарантії": "Warranty check", "Активно": "Active", "Активна": "Active", "Призупинена": "Suspended",
+    "Доступ до складу й сервісу": "Access to warehouse and service", "Адміністратори керують складом": "Administrators manage the warehouse",
+    "Дилери бачать звернення по своїх продажах": "Dealers see requests for their own sales",
     "Прийняти товар": "Receive goods", "Прийняти на склад": "Receive into stock", "Пошук серійного номера": "Search serial number",
     "Примітка (накладна, партія)": "Note (invoice, batch)", "Або завантажте CSV / TXT файл": "Or upload a CSV / TXT file",
     "Серійні номери: по одному в рядку або через кому. Можна вставити з Excel.": "Serial numbers: one per line or comma-separated. You can paste from Excel.",
