@@ -65,8 +65,11 @@ tbody tr{transition:background .12s}tbody tr:hover{background:#f7f5ff}
 @font-face{font-family:"Warrio Sans";src:url(assets/fonts/Inter-Medium.woff) format("woff");font-weight:500;font-display:swap}
 @font-face{font-family:"Warrio Sans";src:url(assets/fonts/Inter-SemiBold.woff) format("woff");font-weight:600 800;font-display:swap}
 @font-face{font-family:"Warrio Display";src:url(assets/fonts/InterDisplay-SemiBold.woff) format("woff");font-weight:500 800;font-display:swap}
-html,body,button,input,select,textarea{font-family:"Warrio Sans",Inter,"Segoe UI",Arial,sans-serif!important;font-feature-settings:"cv11","ss03";-webkit-font-smoothing:antialiased}
-h1,h2,h3,.stat strong,.brand span{font-family:"Warrio Display","Warrio Sans",Inter,sans-serif!important}
+html,body,button,input,select,textarea,h1,h2,h3,.stat strong,.brand span{font-family:var(--ff)!important;-webkit-font-smoothing:antialiased}
+html{--ff:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+html[data-font=inter]{--ff:"Warrio Sans",Inter,sans-serif}
+html[data-font=display]{--ff:"Warrio Display Text","Warrio Display",Inter,sans-serif}
+html[data-font=carlito]{--ff:"Warrio Soft",Carlito,Calibri,sans-serif}
 b,strong{font-weight:600}
 .page-head h1{font-weight:600!important;font-size:32px!important}
 .card-head h2{font-size:16px!important;font-weight:600}
@@ -172,3 +175,62 @@ html[data-theme=dark] .attention-row b,html[data-theme=dark] .arrow,html[data-th
 html[data-theme=dark] .stats .stat .arrow{background:rgba(255,255,255,.12)!important}
 html[data-theme=dark] .status{filter:saturate(.9)}
 html[data-theme=dark] .fx-note.read{background:#1a1432!important}
+
+@font-face{font-family:"Warrio Display Text";src:url(assets/fonts/InterDisplay-Regular.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Warrio Display Text";src:url(assets/fonts/InterDisplay-Medium.woff) format("woff");font-weight:500;font-display:swap}
+@font-face{font-family:"Warrio Display Text";src:url(assets/fonts/InterDisplay-SemiBold.woff) format("woff");font-weight:600 800;font-display:swap}
+@font-face{font-family:"Warrio Soft";src:url(assets/fonts/Carlito-Regular.woff) format("woff");font-weight:400 500;font-display:swap}
+@font-face{font-family:"Warrio Soft";src:url(assets/fonts/Carlito-Bold.woff) format("woff");font-weight:600 800;font-display:swap}
+
+/* ---- Window layout: the frame fits the screen, content scrolls inside ---- */
+@media(min-width:1151px){
+ .app{height:calc(100vh - 56px)!important;min-height:0!important;grid-template-rows:minmax(0,1fr)}
+ .sidebar{height:100%!important;position:relative!important;top:auto!important}
+ .main{height:100%;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth}
+ .main::-webkit-scrollbar{width:10px}.main::-webkit-scrollbar-thumb{background:#d6d1ee;border-radius:10px;border:3px solid transparent;background-clip:padding-box}
+ .topbar{position:sticky;top:0;z-index:15;background:rgba(244,244,248,.86)!important;backdrop-filter:blur(14px)!important}
+}
+html[data-theme=dark] .topbar{background:rgba(10,7,22,.82)!important}
+html[data-theme=dark] .main::-webkit-scrollbar-thumb{background:#3b3166}
+
+/* lighter weights */
+.nav-btn.active{font-weight:500!important}
+.nav-badge{font-weight:500!important}
+.page-head h1{font-weight:600!important}
+.btn,.btn.primary{font-weight:500!important}
+.stat strong{font-weight:600!important}
+
+/* "needs attention" icons in the same violet as recent events */
+.issue-icon,.issue-icon.red,.issue-icon.amber{background:var(--soft)!important;color:var(--violet)!important}
+.attention-row b{background:var(--soft)!important;color:#3b2f8f!important;border-radius:999px!important;font-weight:500!important}
+
+/* charts and bars draw themselves */
+.page.active .chart-box canvas{animation:reveal 1s var(--ease) both .15s}
+@keyframes reveal{from{clip-path:inset(0 100% 0 0);opacity:.4}to{clip-path:inset(0 0 0 0);opacity:1}}
+.page.active .bar,.page.active [class*="bar-fill"],.page.active .progress i{transform-origin:left;animation:grow .9s var(--ease) both .2s}
+@keyframes grow{from{transform:scaleX(0)}to{transform:none}}
+.page.active .activity-row,.page.active .attention-row,.page.active tbody tr{animation:rise .4s var(--ease) both}
+.page.active .activity-row:nth-child(2),.page.active .attention-row:nth-child(2),.page.active tbody tr:nth-child(2){animation-delay:.05s}
+.page.active .activity-row:nth-child(3),.page.active .attention-row:nth-child(3),.page.active tbody tr:nth-child(3){animation-delay:.1s}
+.page.active .activity-row:nth-child(4),.page.active .attention-row:nth-child(4),.page.active tbody tr:nth-child(4){animation-delay:.15s}
+.page.active .activity-row:nth-child(n+5),.page.active .attention-row:nth-child(n+5),.page.active tbody tr:nth-child(n+5){animation-delay:.2s}
+
+/* ---- Dark theme: deeper black, strong violet accent ---- */
+html[data-theme=dark]{--violet:#7c5cff;--violet2:#9b84ff}
+html[data-theme=dark],html[data-theme=dark] body{background:radial-gradient(900px 520px at 8% -8%,#2b1d6b 0,transparent 60%),radial-gradient(700px 480px at 100% 110%,#1d1450 0,transparent 60%),#05030c!important}
+html[data-theme=dark] .app{background:#0b0818!important}
+html[data-theme=dark] .card,html[data-theme=dark] .modal,html[data-theme=dark] .drawer,html[data-theme=dark] .profile-menu,html[data-theme=dark] .fx-sel-list,html[data-theme=dark] .sidebar #user-menu,html[data-theme=dark] .icon-btn,html[data-theme=dark] .user,html[data-theme=dark] #fx-sound,html[data-theme=dark] #fx-theme{background:#130e26!important}
+html[data-theme=dark] .stats .stat:nth-child(1){background:linear-gradient(135deg,#6a4cff,#4a32c9)!important;color:#fff}
+html[data-theme=dark] .stats .stat:nth-child(1) small,html[data-theme=dark] .stats .stat:nth-child(1) .trend{color:#ddd5ff!important}
+html[data-theme=dark] .stats .stat:nth-child(3){background:#000!important;box-shadow:0 0 0 1px #2a2050!important}
+html[data-theme=dark] .nav-btn.active{background:var(--violet)!important;color:#fff!important;box-shadow:0 8px 24px rgba(124,92,255,.45)!important}
+html[data-theme=dark] .nav-btn.active .ico{color:#fff}
+html[data-theme=dark] .nav-badge{background:#2a2050!important;color:#d9d0ff!important}
+html[data-theme=dark] .nav-btn.active .nav-badge{background:rgba(255,255,255,.22)!important;color:#fff!important}
+html[data-theme=dark] .btn.primary{background:var(--violet)!important;box-shadow:0 8px 26px rgba(124,92,255,.45)}
+html[data-theme=dark] .stat-icon,html[data-theme=dark] .quick-btn,html[data-theme=dark] .kanban-col,html[data-theme=dark] .fx-note{background:#1b1436!important}
+html[data-theme=dark] .issue-icon,html[data-theme=dark] .attention-row b{background:#2a1f66!important;color:#c9bcff!important}
+html[data-theme=dark] .fx-opt.sel{background:var(--violet);color:#fff}
+html[data-theme=dark] .fx-opt.sel:after{border-color:#fff}
+html[data-theme=dark] input[type=checkbox]:checked{background:var(--violet)!important}
+@media(min-width:1151px) and (max-height:900px){.nav-btn{min-height:35px!important;padding-top:6px!important;padding-bottom:6px!important}.sidebar{padding-top:16px!important;padding-bottom:12px!important}.sidebar .brand{padding-bottom:10px!important}.sidebar #user-menu{margin-top:6px;padding:8px 12px}.menu-title{padding-top:8px!important}}
