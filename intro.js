@@ -10,9 +10,13 @@
   document.addEventListener("DOMContentLoaded", function () {
     var el = document.getElementById("warrio-intro");
     if (!el) { root.classList.remove("intro"); return; }
-    setTimeout(function () {
+    var closed = false;
+    function close() {
+      if (closed) return; closed = true;
       el.classList.add("out");
-      setTimeout(function () { el.remove(); root.classList.remove("intro"); }, 800);
-    }, 2600);
+      setTimeout(function () { el.remove(); root.classList.remove("intro"); }, 1100);
+    }
+    el.addEventListener("click", close);
+    setTimeout(close, 5600);
   });
 })();
