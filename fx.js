@@ -345,6 +345,7 @@
     row.append(
       mk(dark ? "Світла тема" : "Темна тема", () => { document.querySelector("#fx-theme")?.click(); close(); }),
       mk(muted ? "Увімкнути звук" : "Вимкнути звук", () => { document.querySelector("#fx-sound")?.click(); close(); }),
+      mk(document.querySelector("#lang-switch")?.textContent.trim() === "EN" ? "English" : "Українська", () => { document.querySelector("#lang-switch")?.click(); close(); }),
       mk("Вийти", () => { close(); setTimeout(() => document.querySelector('[data-action="logout"]')?.click(), 150); })
     );
     row.lastChild.classList.add("danger");
