@@ -39,6 +39,7 @@ jobs:
           node --check service/app.js
           node --check platform/app.js
           node --check stock.js
+          node --check i18n.js
           test -f service/index.html
           node --check verify/app.js
           if grep -RIE --include='*.js' --include='*.html' --include='*.json' \
