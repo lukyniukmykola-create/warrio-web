@@ -10,6 +10,7 @@
   <title>Перевірка гарантії — Warrio</title>
   <link rel="icon" href="../assets/warrio-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles-v0.7.css">
+  <link rel="stylesheet" href="../public-mobile.css?v=20261118h">
 </head>
 <body>
   <main class="shell">
@@ -30,7 +31,7 @@
       <form id="lookup-form" class="lookup" novalidate>
         <label for="token">Захищений код або посилання</label>
         <div class="lookup-row">
-          <input id="token" name="token" autocomplete="off" spellcheck="false" placeholder="Вставте код або https://…?token=…" maxlength="512">
+          <input id="token" name="token" autocomplete="off" autocapitalize="none" autocorrect="off" enterkeyhint="go" spellcheck="false" placeholder="Вставте код або https://…?token=…" maxlength="512">
           <button type="submit">Перевірити</button>
         </div>
         <p class="lookup-hint">Номер виду WRR-2026-000003 шукається в кабінеті Warrio. Публічна перевірка навмисно працює лише із захищеним QR-кодом.</p>

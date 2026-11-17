@@ -1,0 +1,14 @@
+/* Shared phone polish for the public pages (buyer forms, verification). */
+@media(max-width:780px){
+ html{-webkit-text-size-adjust:100%}
+ body{padding-bottom:env(safe-area-inset-bottom)}
+ input,textarea,select{font-size:16px!important;min-height:50px;border-radius:14px!important}
+ textarea{min-height:110px;resize:none!important}
+ label{font-size:13px!important;gap:8px!important}
+ .grid{gap:18px!important}
+ button[type=submit],.submit{min-height:54px;font-size:16px!important;border-radius:16px!important;margin-top:18px;box-shadow:0 10px 24px rgba(91,69,247,.3)}
+ .card h1{font-size:27px!important}
+ .links a,.links button{min-height:46px;display:inline-flex;align-items:center}
+ .message{font-size:14px!important}
+ .private{font-size:13px!important}
+}
