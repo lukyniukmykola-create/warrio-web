@@ -64,7 +64,13 @@
       <div style="margin-top:12px;display:flex;gap:12px;align-items:center"><button class="btn primary" type="button" id="di-run">Імпортувати</button><span id="di-status" role="status" style="font-size:13px;color:var(--muted)"></span></div>
       <ul id="di-result" style="font-size:13px;padding-left:18px"></ul></div>`;
     document.body.appendChild(overlay);
-    overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+    {
+      let down = false;
+      const box = overlay.firstElementChild;
+      const outside = event => { if (event.target !== overlay) return false; const r = box.getBoundingClientRect(), m = 24; return event.clientX < r.left - m || event.clientX > r.right + m || event.clientY < r.top - m || event.clientY > r.bottom + m; };
+      overlay.addEventListener("mousedown", event => { down = outside(event); });
+      overlay.addEventListener("click", event => { if (down && outside(event)) close(); down = false; });
+    }
     $("#di-close").addEventListener("click", close);
     $("#di-file").addEventListener("change", event => {
       const file = event.target.files?.[0];
