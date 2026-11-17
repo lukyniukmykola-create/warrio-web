@@ -286,16 +286,28 @@
       ["service", "Сервіс", ICON.wrench], ["menu", "Ще", '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>']];
     const bar = document.createElement("nav");
     bar.id = "fx-tabbar"; bar.className = "fx-tabbar";
+    const lens = document.createElement("i");
+    lens.className = "fx-lens";
+    bar.append(lens);
     for (const [page, label, icon] of defs) {
       const b = document.createElement("button");
       b.type = "button"; b.dataset.tab = page; b.innerHTML = `${icon}<span>${label}</span>`;
       b.addEventListener("click", () => {
+        sounds.nav();
         if (page === "menu") { document.querySelector("#sidebar")?.classList.toggle("open"); return; }
         document.querySelector(`.nav-btn[data-page="${page}"]`)?.click();
       });
       bar.append(b);
     }
     document.body.append(bar);
+
+    const buttons = () => [...bar.querySelectorAll("button:not([hidden])")];
+    const place = (button, stretch = false) => {
+      if (!button) { lens.style.opacity = "0"; return; }
+      lens.style.opacity = "1";
+      lens.style.width = `${button.offsetWidth}px`;
+      lens.style.transform = `translateX(${button.offsetLeft}px)${stretch ? " scale(1.1,1.06)" : ""}`;
+    };
     const sync = () => {
       const active = document.querySelector(".page.active")?.id?.replace("page-", "");
       bar.querySelectorAll("button").forEach(b => {
@@ -303,11 +315,45 @@
         const nav = document.querySelector(`.nav-btn[data-page="${b.dataset.tab}"]`);
         b.hidden = b.dataset.tab !== "menu" && (!nav || nav.hidden);
       });
+      if (!bar.classList.contains("grab")) place(bar.querySelector("button.on"));
     };
     let busy = false, again = false;
     const safe = () => { if (busy) { again = true; return; } busy = true; sync(); setTimeout(() => { busy = false; if (again) { again = false; safe(); } }, 120); };
     new MutationObserver(safe).observe(document.body, { attributes: true, subtree: true, attributeFilter: ["class", "hidden"] });
-    sync();
+    addEventListener("resize", sync);
+
+    // Liquid-glass behaviour: press to magnify the lens, drag it between tabs, release to choose.
+    let startX = 0, dragging = false, down = false;
+    const under = x => {
+      const r = bar.getBoundingClientRect();
+      return buttons().find(b => { const br = b.getBoundingClientRect(); return x >= br.left && x <= br.right; }) || buttons().reduce((best, b) => {
+        const c = b.getBoundingClientRect(); const d = Math.abs(x - (c.left + c.width / 2));
+        return !best || d < best.d ? { b, d } : best;
+      }, null)?.b || null;
+    };
+    bar.addEventListener("pointerdown", event => {
+      down = true; dragging = false; startX = event.clientX;
+      bar.classList.add("grab");
+      place(under(event.clientX), true);
+    });
+    bar.addEventListener("pointermove", event => {
+      if (!down) return;
+      if (Math.abs(event.clientX - startX) > 8) dragging = true;
+      const target = under(event.clientX);
+      if (target) place(target, true);
+    });
+    const release = event => {
+      if (!down) return;
+      down = false;
+      bar.classList.remove("grab");
+      const target = under(event.clientX);
+      if (dragging && target) { target.click(); }
+      setTimeout(() => { dragging = false; sync(); }, 0);
+    };
+    bar.addEventListener("pointerup", release);
+    bar.addEventListener("pointercancel", () => { down = false; bar.classList.remove("grab"); sync(); });
+    bar.addEventListener("click", event => { if (dragging) { event.stopPropagation(); event.preventDefault(); } }, true);
+    requestAnimationFrame(() => { sync(); bar.classList.add("ready"); });
   }
   const $tab = selector => document.querySelector(selector);
   document.addEventListener("click", event => {
