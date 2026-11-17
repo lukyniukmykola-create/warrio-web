@@ -531,3 +531,21 @@ html[data-theme=dark] tbody tr:hover{background:rgba(255,255,255,.06)!important}
 /* Space between the top bar and the page title */
 .page-head{margin-top:22px!important}
 @media(max-width:760px){.page-head{margin-top:20px!important}}
+
+/* ===== Audit fixes ===== */
+/* dark theme: installation cards */
+html[data-theme=dark] .job{background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.04))!important;border:1px solid rgba(255,255,255,.12)!important;color:var(--ink)!important;box-shadow:0 10px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.14)!important}
+html[data-theme=dark] .job b{color:var(--ink)!important}
+html[data-theme=dark] .job small,html[data-theme=dark] .job .job-foot,html[data-theme=dark] .job .job-foot span{color:var(--muted)!important}
+html[data-theme=dark] .job .initials{background:var(--violet)!important;color:#fff!important}
+html[data-theme=dark] .kanban-head span{background:rgba(255,255,255,.12)!important;color:var(--ink)!important;border-color:rgba(255,255,255,.14)!important}
+html[data-theme=dark] .kanban-head h3{color:var(--ink)!important}
+@media(max-width:760px){
+ /* language switch lives in the More sheet on phones */
+ #lang-switch{display:none!important}
+ .donut-wrap{grid-template-columns:1fr!important;height:auto!important;gap:14px;justify-items:center}
+ .donut-wrap canvas{width:210px!important;height:210px!important}
+ .legend{display:flex!important;flex-wrap:wrap;gap:8px 16px;justify-content:center}
+ .fx-more-row{grid-template-columns:1fr 1fr!important}
+ .fx-more-row button{min-height:44px}
+}
