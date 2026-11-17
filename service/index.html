@@ -23,7 +23,7 @@
           <label class="full">Коротко про проблему<input id="title" required minlength="2" maxlength="200"></label>
           <label class="full">Опис<textarea id="description" maxlength="4000"></textarea></label>
           <label class="full">Посилання на фото чи відео (по одному в рядку, https://, до 5)<textarea id="photos"></textarea></label>
-          <label class="full">Як зручніше зв'язатися (необов'язково)<input id="contact-note" maxlength="300"></label>
+          <label class="full">Ваш телефон для зв'язку (обов'язково)<input id="contact-note" maxlength="300" minlength="5" required type="tel" autocomplete="tel" placeholder="+380…"></label>
         </div>
         <button class="submit" type="submit">Надіслати звернення</button>
         <div class="message" id="message" role="alert" aria-live="polite"></div>

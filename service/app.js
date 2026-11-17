@@ -17,6 +17,7 @@
     too_many_open_requests: "По цьому виробу вже є кілька відкритих звернень. Зачекайте відповіді компанії.",
     invalid_photo_links: "Посилання мають починатися з https:// (не більше 5).",
     warranty_not_found: "Гарантію не знайдено. Перевірте посилання.",
+    contact_required: "Вкажіть телефон, щоб компанія могла з вами зв'язатися.",
     invalid_request: "Перевірте заголовок і довжину полів."
   };
   const statusLabels = { new: "Нове", in_progress: "У роботі", waiting_parts: "Чекаємо запчастини", resolved: "Вирішено", rejected: "Відхилено" };
@@ -77,7 +78,7 @@
       });
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
-        message.textContent = errors[payload?.message] || "Не вдалося надіслати звернення. Спробуйте пізніше.";
+        message.textContent = errors[payload?.message] || `Не вдалося надіслати звернення (${payload?.message || response.status}). Спробуйте пізніше.`;
         submit.disabled = false;
         return;
       }

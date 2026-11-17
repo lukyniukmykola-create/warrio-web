@@ -103,7 +103,7 @@
     $("#stock-file").addEventListener("change", readFile);
     $("#stock-labels-open").addEventListener("click", openLabels);
     $("#stock-history-close").addEventListener("click", closeHistory);
-    $("#stock-history").addEventListener("click", event => { if (event.target.id === "stock-history") closeHistory(); });
+    bindOutsideClose($("#stock-history"), $("#stock-history > *"), closeHistory);
     document.addEventListener("keydown", event => { if (event.key === "Escape") { closeHistory(); closeLabels(); } });
     $("#stock-filter").addEventListener("change", loadList);
     let timer;
@@ -212,12 +212,6 @@
     if (!items.length) { message("Немає що друкувати: у списку нема виробів зі статусом «На складі». Спершу прийміть товар (форма «Прийняти товар» вище), потім натисніть кнопку знову."); return; }
     if (!window.WarrioQR) { message("Модуль QR не завантажено."); return; }
     closeLabels();
-    if (!$("#stock-print-style")) {
-      const style = document.createElement("style");
-      style.id = "stock-print-style";
-      style.textContent = "@media print{body>*:not(#stock-labels){display:none!important}#stock-labels{position:static!important;overflow:visible!important}#stock-labels .no-print{display:none!important}#stock-labels .label-grid{padding:0!important}}";
-      document.head.appendChild(style);
-    }
     const overlay = document.createElement("div");
     overlay.id = "stock-labels";
     overlay.style.cssText = "position:fixed;inset:0;z-index:1100;background:#fff;overflow:auto;color:#000";
@@ -230,35 +224,34 @@
     print.type = "button";
     print.textContent = "Друк";
     print.style.marginLeft = "auto";
-    print.addEventListener("click", () => window.print());
-    const close = document.createElement("button");
+        const close = document.createElement("button");
     close.className = "btn";
     close.type = "button";
     close.textContent = "Закрити";
     close.addEventListener("click", closeLabels);
     bar.append(print, close);
-    const grid = document.createElement("div");
-    grid.className = "label-grid";
-    grid.style.cssText = "display:grid;grid-template-columns:repeat(auto-fill,minmax(52mm,1fr));gap:3mm;padding:16px";
-    for (const row of items) {
-      const cell = document.createElement("div");
-      cell.style.cssText = "border:1px dashed #999;padding:2mm;display:flex;gap:2mm;align-items:center;break-inside:avoid;min-height:26mm";
-      const qr = document.createElement("div");
-      qr.style.cssText = "width:22mm;height:22mm;flex:none";
-      qr.innerHTML = window.WarrioQR.svg(row.serial_number, 4, 1).replace(/width="\d+" height="\d+"/, 'width="100%" height="100%"');
-      const text = document.createElement("div");
-      text.style.cssText = "font:600 11px/1.3 Consolas,monospace;word-break:break-all";
-      const serial = document.createElement("div");
-      serial.textContent = row.serial_number;
-      const model = document.createElement("div");
-      model.style.cssText = "font:400 10px/1.3 Arial,sans-serif;color:#333;margin-top:1mm";
-      model.textContent = row.model_name;
-      text.append(serial, model);
-      cell.append(qr, text);
-      grid.append(cell);
-    }
+    const esc = value => String(value ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+    const cells = items.map(row => `<div class="c"><div class="q">${window.WarrioQR.svg(row.serial_number, 4, 1).replace(/width="\d+" height="\d+"/, 'width="100%" height="100%"')}</div><div class="t"><b>${esc(row.serial_number)}</b><span>${esc(row.model_name)}</span></div></div>`).join("");
+    const doc = `<!doctype html><html><head><meta charset="utf-8"><style>@page{size:A4;margin:8mm}body{margin:0;padding:12px;background:#fff;color:#000;font-family:Arial,sans-serif}.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(52mm,1fr));gap:3mm}.c{border:1px dashed #999;padding:2mm;display:flex;gap:2mm;align-items:center;break-inside:avoid;min-height:26mm}.q{width:22mm;height:22mm;flex:none}.t{font:600 11px/1.3 Consolas,monospace;word-break:break-all}.t span{display:block;font:400 10px/1.3 Arial,sans-serif;color:#333;margin-top:1mm}</style></head><body><div class="g">${cells}</div></body></html>`;
+    const frame = document.createElement("iframe");
+    frame.title = "Наклейки";
+    frame.style.cssText = "display:block;width:100%;height:calc(100vh - 60px);border:0;background:#fff";
+    frame.srcdoc = doc;
+    print.onclick = () => { frame.contentWindow.focus(); frame.contentWindow.print(); };
+    const grid = frame;
     overlay.append(bar, grid);
     document.body.appendChild(overlay);
+  }
+
+  function bindOutsideClose(overlay, dialog, close) {
+    let downOutside = false;
+    const outside = event => {
+      if (event.target !== overlay || !dialog) return false;
+      const r = dialog.getBoundingClientRect(), m = 24;
+      return event.clientX < r.left - m || event.clientX > r.right + m || event.clientY < r.top - m || event.clientY > r.bottom + m;
+    };
+    overlay.addEventListener("mousedown", event => { downOutside = outside(event); });
+    overlay.addEventListener("click", event => { if (downOutside && outside(event)) close(); downOutside = false; });
   }
 
   function closeLabels() { $("#stock-labels")?.remove(); }
@@ -338,23 +331,37 @@
     try {
       const rows = await window.WarrioData.rpc("get_warrio_stock", { p_organization_id: ctx.organization.id, p_search: null, p_status: "in_stock", p_limit: 500 });
       if (!rows?.length || !input.isConnected) return;
-      const list = document.createElement("datalist");
-      list.id = "stock-serials-list";
-      for (const row of rows) { const option = document.createElement("option"); option.value = row.serial_number; option.label = row.model_name; list.append(option); }
-      input.after(list);
-      input.setAttribute("list", list.id);
-      input.setAttribute("autocomplete", "off");
+      const modelSelect = document.querySelector("#m-model");
+      const pickSelect = document.createElement("select");
+      pickSelect.id = "m-sn-pick";
+      pickSelect.style.cssText = "width:100%;margin-bottom:6px";
       const hint = document.createElement("small");
       hint.style.cssText = "display:block;color:var(--muted);margin-top:4px";
-      hint.textContent = `На складі: ${rows.length}. Почніть вводити серійний номер, і модель підставиться сама.`;
-      list.after(hint);
-      const pick = () => {
-        const match = rows.find(row => row.serial_number === input.value.trim().toUpperCase());
-        const select = document.querySelector("#m-model");
-        if (match && select && [...select.options].some(option => option.value === match.model_code)) select.value = match.model_code;
+      const fill = () => {
+        const code = modelSelect?.value;
+        const subset = rows.filter(row => !code || row.model_code === code);
+        pickSelect.textContent = "";
+        const first = document.createElement("option");
+        first.value = "";
+        first.textContent = subset.length ? `Вибрати зі складу (${subset.length})` : "Для цієї моделі на складі нічого немає";
+        pickSelect.append(first);
+        for (const row of subset) { const option = document.createElement("option"); option.value = row.serial_number; option.textContent = `${row.serial_number} · ${row.model_name}`; pickSelect.append(option); }
+        hint.textContent = `Усього на складі: ${rows.length}. Оберіть серійний номер зі списку або введіть вручну.`;
       };
-      input.addEventListener("input", pick);
-      input.addEventListener("change", pick);
+      input.before(pickSelect);
+      input.after(hint);
+      fill();
+      modelSelect?.addEventListener("change", fill);
+      pickSelect.addEventListener("change", () => {
+        if (!pickSelect.value) return;
+        input.value = pickSelect.value;
+        const match = rows.find(row => row.serial_number === pickSelect.value);
+        if (match && modelSelect && [...modelSelect.options].some(option => option.value === match.model_code)) modelSelect.value = match.model_code;
+      });
+      input.addEventListener("input", () => {
+        const match = rows.find(row => row.serial_number === input.value.trim().toUpperCase());
+        if (match && modelSelect && [...modelSelect.options].some(option => option.value === match.model_code)) { modelSelect.value = match.model_code; fill(); pickSelect.value = match.serial_number; }
+      });
     } catch { /* no access or migration 018 missing: plain input stays */ }
   }
   new MutationObserver(() => { const input = document.querySelector("#m-sn"); if (input) attachSaleHelper(input); })
