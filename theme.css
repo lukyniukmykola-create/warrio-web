@@ -605,3 +605,7 @@ html.intro #warrio-intro.out{opacity:0;transform:scale(1.1);filter:blur(10px);po
  body:has(#auth-gate:not([hidden])) #lang-switch{display:block!important;top:calc(14px + env(safe-area-inset-top))!important;bottom:auto!important;right:14px!important;left:auto!important;z-index:2147483000;background:rgba(255,255,255,.18)!important;color:#fff!important;border:1px solid rgba(255,255,255,.35)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 }
 @media(prefers-reduced-motion:reduce){.auth-gate:before,.auth-gate:after,.auth-panel,.auth-view>*,.wi-orb{animation:none!important}}
+
+/* Hotfix: the login screen must disappear once signed in */
+.auth-gate[hidden],.auth-gate[hidden] *{display:none!important}
+.auth-gate[hidden]:before,.auth-gate[hidden]:after{display:none!important}
