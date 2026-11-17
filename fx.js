@@ -205,6 +205,27 @@
   }
   const queueNumbers = () => { if (!numQueued) { numQueued = true; requestAnimationFrame(numbers); } };
 
+  // Right on-screen keyboard and autofill hints for every form field.
+  function fieldHints() {
+    document.querySelectorAll("input,textarea").forEach(el => {
+      if (el.dataset.fxHint) return;
+      el.dataset.fxHint = "1";
+      const key = `${el.id} ${el.name} ${el.placeholder} ${el.closest("label")?.textContent || ""}`.toLowerCase();
+      if (el.type === "checkbox" || el.type === "hidden" || el.type === "file") return;
+      if (/phone|тел/.test(key)) { el.type = el.type === "text" ? "tel" : el.type; el.setAttribute("inputmode", "tel"); el.setAttribute("autocomplete", "tel"); }
+      else if (/e-?mail|пошт/.test(key)) { el.setAttribute("inputmode", "email"); el.setAttribute("autocapitalize", "none"); el.setAttribute("autocorrect", "off"); }
+      else if (/serial|серій|\bsn\b|n600|n1000|-26-/.test(key) || /^(m-sn|sn|serial)/.test(el.id)) { el.setAttribute("autocapitalize", "characters"); el.setAttribute("autocorrect", "off"); el.setAttribute("spellcheck", "false"); el.setAttribute("autocomplete", "off"); }
+      else if (/code|код|token/.test(key)) { el.setAttribute("autocapitalize", "characters"); el.setAttribute("autocorrect", "off"); el.setAttribute("autocomplete", "off"); }
+      if (el.tagName === "INPUT" && !el.hasAttribute("enterkeyhint")) el.setAttribute("enterkeyhint", el.type === "search" ? "search" : "next");
+    });
+  }
+  // Keep the focused field visible above the keyboard.
+  document.addEventListener("focusin", event => {
+    const el = event.target;
+    if (!el.matches?.("input,textarea,select") || !matchMedia("(max-width:760px)").matches) return;
+    setTimeout(() => el.scrollIntoView({ block: "center", behavior: "smooth" }), 280);
+  });
+
   function restructure() {
     const user = document.querySelector("#user-menu");
     const bottom = document.querySelector(".sidebar-bottom");
@@ -565,8 +586,8 @@
     if (host) host.prepend(sound(), theme());
     restructure(); icons(); notifications();
     document.querySelectorAll("select").forEach(enhanceSelect);
-    watch(); scan(); numbers(); plainSymbols(); labelTables(); navLens(); modalSwipe();
-    new MutationObserver(() => { scan(); queueNumbers(); queueSymbols(); queueTables(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
+    watch(); scan(); numbers(); plainSymbols(); labelTables(); fieldHints(); navLens(); modalSwipe();
+    new MutationObserver(() => { scan(); queueNumbers(); queueSymbols(); queueTables(); fieldHints(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
       .observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
