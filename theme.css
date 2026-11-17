@@ -623,3 +623,27 @@ html.app-in .page.active .page-head{animation:appUp .8s cubic-bezier(.2,.9,.3,1)
 html.app-in .page.active :is(.card,.stat,.metric,.job,.dealer,.kanban-col){animation:appUp .85s cubic-bezier(.2,.9,.3,1) calc(.22s + var(--ai,0)*.07s) both!important}
 html.app-in .fx-tabbar{animation:appTab 1s cubic-bezier(.3,1.25,.5,1) .45s both!important}
 @media(prefers-reduced-motion:reduce){html.app-in *{animation:none!important}}
+
+/* ===== Attention rows: soft violet instead of a white frame ===== */
+.attention-row{background:linear-gradient(180deg,rgba(122,96,255,.11),rgba(122,96,255,.05))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.6),0 0 0 1px rgba(106,82,245,.14)!important}
+.attention-row.hot{background:linear-gradient(180deg,rgba(122,96,255,.2),rgba(122,96,255,.1))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.55),0 0 0 1px rgba(106,82,245,.28),0 6px 18px rgba(106,82,245,.12)!important}
+html[data-theme=dark] .attention-row{background:linear-gradient(180deg,rgba(140,116,255,.16),rgba(140,116,255,.07))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.1),0 0 0 1px rgba(160,140,255,.16)!important}
+html[data-theme=dark] .attention-row.hot{background:linear-gradient(180deg,rgba(140,116,255,.3),rgba(140,116,255,.14))!important;box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14),0 0 0 1px rgba(170,150,255,.34),0 6px 20px rgba(106,82,245,.25)!important}
+
+/* ===== Quick actions: same type as the rest of the cards ===== */
+.quick-btn{color:var(--ink)!important;text-align:left}
+.quick-btn strong{font-size:14px!important;font-weight:600!important;color:var(--ink)!important;font-family:var(--ff)!important}
+.quick-btn small{font-size:12px!important;color:var(--muted)!important}
+
+/* ===== Dark theme: no more white shapes ===== */
+html[data-theme=dark] .status{border:1px solid transparent}
+html[data-theme=dark] .status.green{background:rgba(35,200,130,.16)!important;color:#5ee6a8!important;border-color:rgba(35,200,130,.3)}
+html[data-theme=dark] .status.amber{background:rgba(255,184,50,.15)!important;color:#ffcf66!important;border-color:rgba(255,184,50,.3)}
+html[data-theme=dark] .status.red{background:rgba(255,90,115,.16)!important;color:#ff90a4!important;border-color:rgba(255,90,115,.3)}
+html[data-theme=dark] .status.violet,html[data-theme=dark] .status.blue,html[data-theme=dark] .status.purple{background:rgba(140,116,255,.2)!important;color:#c9bcff!important;border-color:rgba(160,140,255,.3)}
+html[data-theme=dark] .status.gray,html[data-theme=dark] .status.grey,html[data-theme=dark] .status.neutral{background:rgba(255,255,255,.08)!important;color:#c9c4e6!important}
+html[data-theme=dark] .dealer-stats div{background:rgba(255,255,255,.06)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+html[data-theme=dark] .dealer-stats b{color:var(--ink)!important}
+html[data-theme=dark] .dealer-stats small{color:var(--muted)!important}
+html[data-theme=dark] .progress{background:rgba(255,255,255,.1)!important}
+html[data-theme=dark] .dealer-logo{background:linear-gradient(145deg,#33277a,#4a3aa8)!important;color:#e2dcff!important}
