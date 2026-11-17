@@ -59,3 +59,116 @@ tbody tr{transition:background .12s}tbody tr:hover{background:#f7f5ff}
 #fx-sound:hover{transform:scale(1.1)}#fx-sound:active{transform:scale(.9)}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media(max-width:1150px){body{padding:0!important}.app{border-radius:0!important}}
+
+/* ---- Typography: self-hosted Inter (same look on every computer) ---- */
+@font-face{font-family:"Warrio Sans";src:url(assets/fonts/Inter-Regular.woff) format("woff");font-weight:400;font-display:swap}
+@font-face{font-family:"Warrio Sans";src:url(assets/fonts/Inter-Medium.woff) format("woff");font-weight:500;font-display:swap}
+@font-face{font-family:"Warrio Sans";src:url(assets/fonts/Inter-SemiBold.woff) format("woff");font-weight:600 800;font-display:swap}
+@font-face{font-family:"Warrio Display";src:url(assets/fonts/InterDisplay-SemiBold.woff) format("woff");font-weight:500 800;font-display:swap}
+html,body,button,input,select,textarea{font-family:"Warrio Sans",Inter,"Segoe UI",Arial,sans-serif!important;font-feature-settings:"cv11","ss03";-webkit-font-smoothing:antialiased}
+h1,h2,h3,.stat strong,.brand span{font-family:"Warrio Display","Warrio Sans",Inter,sans-serif!important}
+b,strong{font-weight:600}
+.page-head h1{font-weight:600!important;font-size:32px!important}
+.card-head h2{font-size:16px!important;font-weight:600}
+.page-head p,.card-head p{font-size:13px}
+
+/* ---- Menu: tighter, lighter ---- */
+.nav{gap:1px!important}
+.nav-btn{min-height:38px!important;padding:8px 12px!important;font-size:13.5px!important;font-weight:500!important;gap:11px!important}
+.nav-btn.active{font-weight:600!important}
+.nav-btn .ico{width:18px!important;height:18px!important}
+.nav-badge{font-size:11px!important;font-weight:600!important;min-width:22px;height:20px;padding:0 6px;display:inline-grid;place-items:center;line-height:1}
+.menu-title{padding:12px 12px 6px!important;font-size:10.5px!important;font-weight:600}
+.sidebar .brand{padding-bottom:20px!important}
+.sidebar-bottom{margin-top:auto}
+#backend-status{display:none!important}
+
+/* user card at the bottom of the sidebar */
+.sidebar #user-menu{margin-top:10px;display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff!important;border-radius:18px!important;cursor:pointer;box-shadow:0 1px 2px rgba(40,30,90,.05),0 8px 22px rgba(40,30,90,.06);transition:transform .25s var(--spring)}
+.sidebar #user-menu:hover{transform:translateY(-2px)}
+.sidebar #user-menu>div:nth-child(2){min-width:0;flex:1}
+.sidebar #user-menu strong{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar #user-menu small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar #user-menu>span{display:none}
+.sidebar #user-menu:after{content:"";width:8px;height:8px;border-right:2px solid #a29fb8;border-top:2px solid #a29fb8;transform:rotate(-45deg);flex:none}
+.profile-menu{left:20px!important;right:auto!important;top:auto!important;bottom:86px!important;border-radius:18px!important;border:0!important;box-shadow:0 20px 50px rgba(30,20,80,.22)!important;width:230px!important;animation:pop .25s var(--spring)}
+.profile-menu button{border-radius:12px!important;font-weight:500}
+
+/* ---- Attention rows / lists ---- */
+.attention-row strong{font-size:14px!important;font-weight:600}
+.attention-row small{font-size:12px!important}
+.attention-row .issue-icon,.activity-row .mini,.notice i{font-style:normal}
+.attention-row b{font-weight:600;font-size:12px}
+
+/* ---- Toggle switches instead of check boxes ---- */
+input[type=checkbox]{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:999px;background:#d9d5ec;position:relative;cursor:pointer;flex:none;margin:0 0 0 12px;transition:background .2s;border:0;outline:0}
+input[type=checkbox]:after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(30,20,80,.3);transition:transform .3s var(--spring)}
+input[type=checkbox]:checked{background:var(--violet)}
+input[type=checkbox]:checked:after{transform:translateX(18px)}
+input[type=checkbox]:focus-visible{box-shadow:0 0 0 4px rgba(106,82,245,.2)}
+input[type=checkbox]:active:after{width:22px}
+input[type=checkbox]:checked:active:after{transform:translateX(14px)}
+.switch-row{gap:12px}
+
+/* ---- Custom drop-downs ---- */
+.fx-select{position:relative;display:inline-block;min-width:150px;vertical-align:middle}
+.fx-select.block{display:block;width:100%}
+.fx-select>select{position:absolute!important;inset:0;width:100%!important;height:100%!important;opacity:0;pointer-events:none}
+.fx-sel-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;font-size:13.5px;font-weight:500;color:var(--ink);cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .2s var(--spring)}
+.fx-sel-btn:hover{border-color:#cfc8f3}
+.fx-sel-btn:after{content:"";width:7px;height:7px;border-right:2px solid #8b87a6;border-bottom:2px solid #8b87a6;transform:rotate(45deg) translateY(-2px);flex:none;transition:transform .2s}
+.fx-select.open .fx-sel-btn{border-color:var(--violet2);box-shadow:0 0 0 4px rgba(106,82,245,.12)}
+.fx-select.open .fx-sel-btn:after{transform:rotate(225deg) translateY(-2px)}
+.fx-sel-list{position:fixed;z-index:900;background:#fff;border-radius:18px;box-shadow:0 22px 55px rgba(30,20,80,.24),0 0 0 1px rgba(30,20,80,.05);padding:6px;max-height:280px;overflow:auto;animation:pop .22s var(--spring);transform-origin:top}
+.fx-opt{padding:9px 12px;border-radius:12px;font-size:13.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--ink)}
+.fx-opt:hover{background:var(--soft)}
+.fx-opt.sel{background:var(--tint);color:#2a1f6b;font-weight:600}
+.fx-opt.sel:after{content:"";width:5px;height:9px;border-right:2px solid var(--violet);border-bottom:2px solid var(--violet);transform:rotate(45deg) translate(-2px,-1px)}
+
+/* ---- Icon buttons in the top bar, notification feed ---- */
+#fx-sound,#fx-theme{display:inline-grid;place-items:center;color:#4d4870}
+#fx-sound svg,#fx-theme svg{width:20px;height:20px}
+.icon-btn .dot{display:none}
+.icon-btn.has-new .dot{display:block}
+#fx-feed{display:grid;gap:8px;margin-bottom:10px}
+#fx-feed:empty{display:none}
+.fx-note{display:flex;gap:11px;padding:12px;border-radius:16px;background:var(--soft);animation:pop .35s var(--spring) both;cursor:pointer}
+.fx-note.read{background:#f6f5fb}
+.fx-note i{width:34px;height:34px;border-radius:11px;background:#fff;display:grid;place-items:center;color:var(--violet);flex:none}
+.fx-note i svg{width:18px;height:18px}
+.fx-note b,.fx-note small{display:block}
+.fx-note small{color:var(--muted);font-size:11.5px;margin-top:3px}
+.notice i svg{width:18px;height:18px}
+.drawer{border-radius:26px 0 0 26px!important;top:28px!important;height:calc(100vh - 56px)!important;border-left:0!important;box-shadow:-20px 20px 60px rgba(30,20,80,.2)!important;overflow:auto}
+.sidebar .nav-btn .ico svg{width:18px;height:18px}
+
+/* ---- Dark theme ---- */
+html[data-theme=dark]{color-scheme:dark;--ink:#ecebf8;--muted:#9a96b8;--line:#2c2646;--soft:#2a2350;--tint:#30275f;--bg:#0f0c1d}
+html[data-theme=dark],html[data-theme=dark] body{background:radial-gradient(900px 520px at 8% -8%,#241a52 0,transparent 60%),#0c0a18!important;color:var(--ink)}
+html[data-theme=dark] .app{background:#141028!important;box-shadow:0 40px 110px rgba(0,0,0,.55)!important}
+html[data-theme=dark] .sidebar{border-right-color:rgba(255,255,255,.06)!important}
+html[data-theme=dark] .card,html[data-theme=dark] .modal,html[data-theme=dark] .drawer,html[data-theme=dark] .profile-menu,html[data-theme=dark] .fx-sel-list,html[data-theme=dark] .sidebar #user-menu,html[data-theme=dark] .icon-btn,html[data-theme=dark] .user,html[data-theme=dark] #fx-sound,html[data-theme=dark] #fx-theme{background:#1d1736!important;color:var(--ink)!important}
+html[data-theme=dark] .stats .stat:nth-child(1){background:#2d2360!important}
+html[data-theme=dark] .stats .stat:nth-child(3){background:#0a0716!important}
+html[data-theme=dark] .stat-icon,html[data-theme=dark] .quick-btn,html[data-theme=dark] .kanban-col,html[data-theme=dark] .fx-note{background:#262048!important}
+html[data-theme=dark] .quick-btn{border-color:#332b5c!important}
+html[data-theme=dark] .quick-btn:hover,html[data-theme=dark] .attention-row:hover,html[data-theme=dark] .fx-opt:hover,html[data-theme=dark] tbody tr:hover{background:#2a2350!important}
+html[data-theme=dark] .search input,html[data-theme=dark] .fx-sel-btn,html[data-theme=dark] input,html[data-theme=dark] textarea,html[data-theme=dark] select{background:#1d1736!important;color:var(--ink)!important;border-color:#332b5c!important}
+html[data-theme=dark] .btn{background:#241d46!important;color:var(--ink)!important;border-color:#332b5c!important}
+html[data-theme=dark] .btn.primary{background:var(--violet)!important;border-color:var(--violet)!important;color:#fff!important}
+html[data-theme=dark] .nav-btn{color:#a6a2c4!important}
+html[data-theme=dark] .nav-btn.active{background:#2d2360!important;color:#fff!important}
+html[data-theme=dark] .nav-badge{background:var(--violet)!important}
+html[data-theme=dark] .fx-opt.sel{background:#30275f;color:#fff}
+html[data-theme=dark] table th{background:transparent!important;color:#8f8aae}
+html[data-theme=dark] td,html[data-theme=dark] th{border-color:#2c2646!important}
+html[data-theme=dark] .page-head h1,html[data-theme=dark] h2,html[data-theme=dark] h3{color:var(--ink)}
+html[data-theme=dark] .toast{background:#2d2360!important}
+html[data-theme=dark] input[type=checkbox]{background:#3a3262!important}
+html[data-theme=dark] input[type=checkbox]:checked{background:var(--violet)!important}
+html[data-theme=dark] .sync-card,html[data-theme=dark] .brand{color:var(--ink)}
+html[data-theme=dark] .auth-gate{background:#0c0a18}
+html[data-theme=dark] .attention-row b,html[data-theme=dark] .arrow,html[data-theme=dark] .quick-btn i,html[data-theme=dark] .quick-btn [data-icon],html[data-theme=dark] .activity-row .mini,html[data-theme=dark] .notice i,html[data-theme=dark] .fx-note i{background:#2f2760!important;color:#cfc6ff!important}
+html[data-theme=dark] .stats .stat .arrow{background:rgba(255,255,255,.12)!important}
+html[data-theme=dark] .status{filter:saturate(.9)}
+html[data-theme=dark] .fx-note.read{background:#1a1432!important}

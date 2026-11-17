@@ -42,6 +42,7 @@ jobs:
           node --check qr.js
           node --check dealers-import.js
           node --check i18n.js
+          node --check fx.js
           test -f service/index.html
           node --check verify/app.js
           if grep -RIE --include='*.js' --include='*.html' --include='*.json' \
