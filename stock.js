@@ -331,6 +331,36 @@
     } catch { card.hidden = true; /* migration 021 not applied yet */ }
   }
 
+  // Sale form helper (owner/admin): suggest serials that are in stock and pick the model automatically.
+  async function attachSaleHelper(input) {
+    const ctx = context();
+    if (input.dataset.stockHelper || !["owner", "admin"].includes(ctx?.membership?.role) || !ctx.organization?.id) return;
+    input.dataset.stockHelper = "1";
+    try {
+      const rows = await window.WarrioData.rpc("get_warrio_stock", { p_organization_id: ctx.organization.id, p_search: null, p_status: "in_stock", p_limit: 500 });
+      if (!rows?.length || !input.isConnected) return;
+      const list = document.createElement("datalist");
+      list.id = "stock-serials-list";
+      for (const row of rows) { const option = document.createElement("option"); option.value = row.serial_number; option.label = row.model_name; list.append(option); }
+      input.after(list);
+      input.setAttribute("list", list.id);
+      input.setAttribute("autocomplete", "off");
+      const hint = document.createElement("small");
+      hint.style.cssText = "display:block;color:var(--muted);margin-top:4px";
+      hint.textContent = `На складі: ${rows.length}. Почніть вводити серійний номер, і модель підставиться сама.`;
+      list.after(hint);
+      const pick = () => {
+        const match = rows.find(row => row.serial_number === input.value.trim().toUpperCase());
+        const select = document.querySelector("#m-model");
+        if (match && select && [...select.options].some(option => option.value === match.model_code)) select.value = match.model_code;
+      };
+      input.addEventListener("input", pick);
+      input.addEventListener("change", pick);
+    } catch { /* no access or migration 018 missing: plain input stays */ }
+  }
+  new MutationObserver(() => { const input = document.querySelector("#m-sn"); if (input) attachSaleHelper(input); })
+    .observe(document.body, { childList: true, subtree: true });
+
   injectPage();
   document.addEventListener("click", event => {
     const nav = event.target.closest(".nav-btn[data-page]");
