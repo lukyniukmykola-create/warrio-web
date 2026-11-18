@@ -343,6 +343,7 @@
     const mk = (text, fn) => { const b = document.createElement("button"); b.type = "button"; b.textContent = text; b.addEventListener("click", fn); return b; };
     const dark = document.documentElement.dataset.theme === "dark";
     row.append(
+      mk("Швидкі команди", () => { close(); setTimeout(paletteOpen, 260); }),
       mk(dark ? "Світла тема" : "Темна тема", () => { document.querySelector("#fx-theme")?.click(); close(); }),
       mk(muted ? "Увімкнути звук" : "Вимкнути звук", () => { document.querySelector("#fx-sound")?.click(); close(); }),
       mk(document.querySelector("#lang-switch")?.textContent.trim() === "EN" ? "English" : "Українська", () => { document.querySelector("#lang-switch")?.click(); close(); }),
@@ -643,6 +644,131 @@
     });
   }
 
+  // ---- Command palette (Ctrl/Cmd+K) ----
+  const palette = { el: null, items: [], idx: 0 };
+  function paletteCommands() {
+    const out = [];
+    document.querySelectorAll(".nav-btn[data-page]").forEach(btn => {
+      if (btn.hidden || btn.closest("[hidden]")) return;
+      const label = btn.textContent.replace(/\s+/g, " ").replace(/\d+$/, "").trim();
+      if (!label) return;
+      out.push({ group: "Сторінки", label, icon: btn.querySelector("svg")?.outerHTML || "", run: () => btn.click() });
+    });
+    const act = (label, hint, sel) => { const el = document.querySelector(sel); if (el) out.push({ group: "Дії", label, hint, icon: "", run: () => el.click() }); };
+    act("Зареєструвати продаж", "Новий SN і дилер", '[data-modal="sale"]');
+    act("Створити PDF-сертифікат", "Гарантійний документ", '[data-modal="certificate"]');
+    act("Синхронізувати дані", "Оновити з сервера", '[data-action="sync"]');
+    act("Перевірити QR / публічний статус", "Сторінка покупця", '[data-action="show-public"]');
+    const dark = document.documentElement.dataset.theme === "dark";
+    out.push({ group: "Налаштування", label: dark ? "Світла тема" : "Темна тема", hint: "Перемкнути вигляд", icon: "", run: () => document.querySelector("#fx-theme")?.click() });
+    out.push({ group: "Налаштування", label: "Звук інтерфейсу", hint: "Увімкнути або вимкнути", icon: "", run: () => document.querySelector("#fx-sound")?.click() });
+    const lang = document.querySelector("#lang-switch");
+    if (lang) out.push({ group: "Налаштування", label: lang.textContent.trim() === "EN" ? "English" : "Українська", hint: "Мова інтерфейсу", icon: "", run: () => lang.click() });
+    return out;
+  }
+  function paletteRender() {
+    const list = palette.el.querySelector(".fx-cmd-list");
+    const q = palette.el.querySelector("input").value.trim().toLowerCase();
+    let items = paletteCommands();
+    if (q) {
+      const words = q.split(/\s+/);
+      items = items.filter(i => words.every(w => (i.label + " " + (i.hint || "")).toLowerCase().includes(w)))
+        .sort((a, b) => (b.label.toLowerCase().startsWith(q) ? 1 : 0) - (a.label.toLowerCase().startsWith(q) ? 1 : 0));
+      items.push({ group: "Пошук", label: `Шукати «${palette.el.querySelector("input").value.trim()}» у гарантіях, клієнтах і дилерах`, hint: "", icon: "", run: () => { const s = document.querySelector("#global-search"); if (s) { s.value = palette.el.querySelector("input").value.trim(); s.dispatchEvent(new Event("input", { bubbles: true })); setTimeout(() => s.focus(), 30); } } });
+    }
+    palette.items = items; palette.idx = Math.min(palette.idx, Math.max(0, items.length - 1));
+    list.textContent = "";
+    let group = "";
+    items.forEach((item, i) => {
+      if (item.group !== group) { group = item.group; const h = document.createElement("div"); h.className = "fx-cmd-group"; h.textContent = group; list.append(h); }
+      const row = document.createElement("button");
+      row.type = "button"; row.className = "fx-cmd-item" + (i === palette.idx ? " on" : "");
+      row.innerHTML = `<span class="fx-cmd-ico">${item.icon || ""}</span><span class="fx-cmd-t"></span><small></small>`;
+      row.querySelector(".fx-cmd-t").textContent = item.label; row.querySelector("small").textContent = item.hint || "";
+      row.addEventListener("mousemove", () => { if (palette.idx !== i) { palette.idx = i; paletteMark(); } });
+      row.addEventListener("click", () => paletteRun(i));
+      list.append(row);
+    });
+    if (!items.length) { const e = document.createElement("div"); e.className = "fx-cmd-empty"; e.textContent = "Нічого не знайдено"; list.append(e); }
+  }
+  function paletteMark() { palette.el.querySelectorAll(".fx-cmd-item").forEach((r, i) => { r.classList.toggle("on", i === palette.idx); if (i === palette.idx) r.scrollIntoView({ block: "nearest" }); }); }
+  function paletteRun(i) { const item = palette.items[i]; paletteClose(); if (item) setTimeout(item.run, 120); }
+  function paletteClose() { if (!palette.el) return; const el = palette.el; palette.el = null; el.classList.remove("open"); setTimeout(() => el.remove(), 260); }
+  function paletteOpen() {
+    if (palette.el) return paletteClose();
+    document.querySelector("#fx-more")?.remove();
+    const el = document.createElement("div"); el.className = "fx-cmd";
+    el.innerHTML = `<div class="fx-cmd-box" role="dialog" aria-label="Швидкі команди"><div class="fx-cmd-top"><input type="text" placeholder="Куди перейти або що зробити?" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="go"><kbd>Esc</kbd></div><div class="fx-cmd-list"></div><div class="fx-cmd-foot"><span>↑↓ вибір</span><span>Enter відкрити</span><span>Esc закрити</span></div></div>`;
+    document.body.append(el); palette.el = el; palette.idx = 0; paletteRender();
+    requestAnimationFrame(() => el.classList.add("open"));
+    const input = el.querySelector("input"); setTimeout(() => input.focus(), 40);
+    el.addEventListener("mousedown", e => { if (e.target === el) paletteClose(); });
+    input.addEventListener("input", () => { palette.idx = 0; paletteRender(); });
+    input.addEventListener("keydown", e => {
+      if (e.key === "ArrowDown") { e.preventDefault(); palette.idx = (palette.idx + 1) % Math.max(1, palette.items.length); paletteMark(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); palette.idx = (palette.idx - 1 + palette.items.length) % Math.max(1, palette.items.length); paletteMark(); }
+      else if (e.key === "Enter") { e.preventDefault(); paletteRun(palette.idx); }
+      else if (e.key === "Escape") { e.preventDefault(); paletteClose(); }
+    });
+  }
+  document.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); e.stopImmediatePropagation(); if (!document.querySelector("#auth-gate:not([hidden])")) paletteOpen(); }
+  }, true);
+  document.addEventListener("click", e => { if (e.target.closest?.(".search kbd")) paletteOpen(); });
+
+  // ---- Confetti burst for happy moments ----
+  function confetti(x, y) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const cv = document.createElement("canvas"), dpr = Math.min(2, devicePixelRatio || 1);
+    cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2147483000";
+    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; document.body.append(cv);
+    const c = cv.getContext("2d"); c.scale(dpr, dpr);
+    const cx = x ?? innerWidth / 2, cy = y ?? innerHeight * 0.38, colors = ["#6a52f5", "#8b74ff", "#c9bcff", "#23c882", "#ffb832", "#ff6f91", "#ffffff"];
+    const bits = Array.from({ length: 90 }, () => { const a = Math.random() * Math.PI * 2, v = 5 + Math.random() * 9; return { x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 5, w: 5 + Math.random() * 6, h: 3 + Math.random() * 4, r: Math.random() * 6, vr: (Math.random() - .5) * .35, col: colors[(Math.random() * colors.length) | 0] }; });
+    const t0 = performance.now();
+    (function frame(now) {
+      const t = (now - t0) / 1900; c.clearRect(0, 0, innerWidth, innerHeight);
+      bits.forEach(b => { b.vy += .28; b.vx *= .992; b.x += b.vx; b.y += b.vy; b.r += b.vr; c.save(); c.globalAlpha = Math.max(0, 1 - t * t); c.translate(b.x, b.y); c.rotate(b.r); c.fillStyle = b.col; c.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); c.restore(); });
+      if (t < 1) requestAnimationFrame(frame); else cv.remove();
+    })(t0);
+  }
+  window.WarrioFx = Object.assign(window.WarrioFx || {}, { confetti, openPalette: paletteOpen });
+
+  // ---- Cursor glow + grain texture on cards ----
+  function surfaces() {
+    const fine = matchMedia("(hover:hover) and (pointer:fine)").matches;
+    document.querySelectorAll(".stat,.auth-gate,.dealer-card,.doc,.team-card").forEach(el => {
+      if (!el.querySelector(":scope > .fx-grain")) { const g = document.createElement("i"); g.className = "fx-grain"; g.setAttribute("aria-hidden", "true"); el.append(g); }
+    });
+    if (!fine) return;
+    document.querySelectorAll(".stat,.dealer-card,.doc,.team-card,.quick-btn,.card[data-page-link]").forEach(el => {
+      if (el.dataset.fxGlow) return; el.dataset.fxGlow = "1";
+      const g = document.createElement("i"); g.className = "fx-glow"; g.setAttribute("aria-hidden", "true"); el.append(g);
+      el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); el.style.setProperty("--mx", (e.clientX - r.left) + "px"); el.style.setProperty("--my", (e.clientY - r.top) + "px"); });
+    });
+  }
+
+  // ---- Password strength + form shake ----
+  function strength(v) {
+    let s = 0;
+    if (v.length >= 8) s++; if (v.length >= 12) s++;
+    if (/[a-zа-яіїє]/.test(v) && /[A-ZА-ЯІЇЄ]/.test(v)) s++;
+    if (/\d/.test(v) && /[^\w\s]/.test(v)) s++;
+    return v ? Math.max(1, s) : 0;
+  }
+  document.addEventListener("input", e => {
+    const t = e.target;
+    if (!t.matches?.("#signup-password,#reset-password")) return;
+    let m = t.parentElement.querySelector(".fx-meter");
+    if (!m) { m = document.createElement("div"); m.className = "fx-meter"; m.innerHTML = "<i></i><i></i><i></i><i></i><span></span>"; t.after(m); }
+    const s = strength(t.value);
+    m.dataset.s = s; m.querySelector("span").textContent = ["", "Слабкий пароль", "Нормальний", "Добрий", "Сильний пароль"][s];
+  });
+  new MutationObserver(list => list.forEach(r => {
+    const el = r.target.nodeType === 1 ? r.target : r.target.parentElement;
+    if (el?.classList?.contains("auth-error") && el.textContent.trim()) { const v = el.closest(".auth-panel") || el.parentElement; v.classList.remove("fx-shake"); void v.offsetWidth; v.classList.add("fx-shake"); }
+  })).observe(document.body, { subtree: true, childList: true, characterData: true });
+
   function start() {
     appReveal();
     rememberPage();
@@ -651,8 +777,8 @@
     if (host) host.prepend(sound(), theme());
     restructure(); icons(); notifications();
     document.querySelectorAll("select").forEach(enhanceSelect);
-    watch(); scan(); markAttention(); numbers(); plainSymbols(); labelTables(); fieldHints(); navLens(); modalSwipe();
-    new MutationObserver(() => { scan(); markAttention(); queueNumbers(); queueSymbols(); queueTables(); fieldHints(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
+    watch(); scan(); markAttention(); surfaces(); numbers(); plainSymbols(); labelTables(); fieldHints(); navLens(); modalSwipe();
+    new MutationObserver(() => { scan(); markAttention(); surfaces(); queueNumbers(); queueSymbols(); queueTables(); fieldHints(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
       .observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
