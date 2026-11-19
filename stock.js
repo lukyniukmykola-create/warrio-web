@@ -30,10 +30,12 @@
     reason_required: "Вкажіть причину списання.",
     already_sold: "Проданий виріб списати не можна.",
     already_written_off: "Виріб уже списано.",
-    product_not_found: "Виріб не знайдено."
+    product_not_found: "Виріб не знайдено.",
+    product_already_sold: "Проданий виріб змінити або видалити не можна: спершу видаліть продаж.",
+    invalid_serial: "Неправильний серійний номер (3–64 символи: літери, цифри, . _ / -)."
   };
   const context = () => window.WarrioSession?.getContext?.();
-  const errorText = error => ERRORS[String(error?.message || "")] || (/PGRST202|PGRST205|42883|404/.test(`${error?.code} ${error?.status}`)
+  const errorText = error => ERRORS[String(error?.message || "")] || (String(error?.code) === "23505" ? "Такий серійний номер уже є на складі." : null) || (/PGRST202|PGRST205|42883|404/.test(`${error?.code} ${error?.status}`)
     ? "Склад ще не активовано в базі (потрібна міграція 018)."
     : "Не вдалося виконати дію. Спробуйте ще раз.");
   const dateText = value => value ? new Date(value).toLocaleDateString("uk-UA") : "—";
@@ -61,6 +63,8 @@
   }
 
   let lastRows = [];
+  let modelList = [];
+  const dayKey = value => value ? new Date(value).toLocaleDateString("sv-SE") : "";
 
   function injectPage() {
     if ($("#page-stock")) return;
@@ -105,6 +109,11 @@
     $("#stock-history-close").addEventListener("click", closeHistory);
     bindOutsideClose($("#stock-history"), $("#stock-history > *"), closeHistory);
     document.addEventListener("keydown", event => { if (event.key === "Escape") { closeHistory(); closeLabels(); } });
+    $("#stock-filter").closest(".form-group")?.insertAdjacentHTML("afterend",
+      '<div class="form-group"><label for="stock-day">День поставки</label><input id="stock-day" type="date"></div>' +
+      '<div class="form-group"><label for="stock-group">Вигляд списку</label><select id="stock-group"><option value="days">Групувати за днем поставки</option><option value="">Одним списком</option></select></div>');
+    $("#stock-day").addEventListener("change", () => renderRows());
+    $("#stock-group").addEventListener("change", () => renderRows());
     $("#stock-filter").addEventListener("change", loadList);
     let timer;
     $("#stock-search").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(loadList, 300); });
@@ -113,6 +122,10 @@
       if (history) showHistory(history.dataset.stockHistory, history.dataset.serial);
       const off = event.target.closest("[data-stock-writeoff]");
       if (off) writeOff(off.dataset.stockWriteoff);
+      const edit = event.target.closest("[data-stock-edit]");
+      if (edit) editItem(edit.dataset.stockEdit);
+      const del = event.target.closest("[data-stock-delete]");
+      if (del) deleteItem(del.dataset.stockDelete);
     });
   }
 
@@ -121,6 +134,7 @@
   async function loadModels() {
     const orgId = context()?.organization?.id;
     const models = await window.WarrioData.queryAll("product_models", { select: "id,code,name", organization_id: `eq.${orgId}`, is_active: "eq.true", order: "name.asc" });
+    modelList = models;
     $("#stock-model").innerHTML = models.map(model => `<option value="${esc(model.id)}">${esc(model.name)} (${esc(model.code)})</option>`).join("");
   }
 
@@ -133,26 +147,78 @@
         p_organization_id: orgId,
         p_search: $("#stock-search").value.trim() || null,
         p_status: $("#stock-filter").value || null,
-        p_limit: 200
+        p_limit: 500
       });
       lastRows = rows || [];
-      const isAdmin = ["owner", "admin"].includes(ctx.membership?.role);
-      $("#stock-receive-card").hidden = !isAdmin;
-      $("#stock-body").innerHTML = (rows || []).map(row => {
-        const [label, css] = STATUS[row.status] || [row.status, "violet"];
-        const extra = [row.dealer, row.warranty_number].filter(Boolean).map(esc).join(" · ") || "—";
-        const service = row.open_service_requests > 0 ? `<small style="display:block">Відкритих звернень: ${esc(row.open_service_requests)}</small>` : "";
-        const repeat = row.total_service_requests >= 2 ? `<small style="display:block;color:#b42318;font-weight:600">Повторні звернення: ${esc(row.total_service_requests)}</small>` : "";
-        const off = isAdmin && row.status === "in_stock" ? `<button class="btn small" type="button" data-stock-writeoff="${esc(row.product_id)}">Списати</button> ` : "";
-        return `<tr><td class="mono"><b>${esc(row.serial_number)}</b></td><td>${esc(row.model_name)}<small style="display:block;color:var(--muted)">${esc(row.model_code)}</small></td>
-          <td>${esc(dateText(row.received_at))}</td><td><span class="status ${css}">${esc(label)}</span>${service}${repeat}</td><td>${extra}</td>
-          <td>${off}<button class="btn small" type="button" data-stock-history="${esc(row.product_id)}" data-serial="${esc(row.serial_number)}">Історія</button></td></tr>`;
-      }).join("") || '<tr><td colspan="6" class="empty">Нічого не знайдено</td></tr>';
+      $("#stock-receive-card").hidden = !["owner", "admin"].includes(ctx.membership?.role);
+      renderRows();
       message("");
     } catch (error) {
       $("#stock-body").innerHTML = '<tr><td colspan="6" class="empty">—</td></tr>';
       message(errorText(error));
     }
+  }
+
+  function renderRows() {
+    const isAdmin = ["owner", "admin"].includes(context()?.membership?.role);
+    const day = $("#stock-day")?.value || "";
+    const grouped = ($("#stock-group")?.value ?? "days") === "days";
+    const rows = lastRows.filter(row => !day || dayKey(row.received_at) === day)
+      .sort((a, b) => String(b.received_at || "").localeCompare(String(a.received_at || "")));
+    const counts = new Map();
+    for (const row of rows) counts.set(dayKey(row.received_at), (counts.get(dayKey(row.received_at)) || 0) + 1);
+    let html = "", last = null;
+    for (const row of rows) {
+      if (grouped && dayKey(row.received_at) !== last) {
+        last = dayKey(row.received_at);
+        html += `<tr class="stock-day"><td colspan="6"><b>Поставка ${esc(dateText(row.received_at))}</b> · ${esc(counts.get(last))} шт.</td></tr>`;
+      }
+      const [label, css] = STATUS[row.status] || [row.status, "violet"];
+      const extra = [row.dealer, row.warranty_number].filter(Boolean).map(esc).join(" · ") || "—";
+      const service = row.open_service_requests > 0 ? `<small style="display:block">Відкритих звернень: ${esc(row.open_service_requests)}</small>` : "";
+      const repeat = row.total_service_requests >= 2 ? `<small style="display:block;color:#b42318;font-weight:600">Повторні звернення: ${esc(row.total_service_requests)}</small>` : "";
+      const fix = isAdmin && row.status === "in_stock"
+        ? `<button class="btn small" type="button" data-stock-edit="${esc(row.product_id)}">Змінити</button> <button class="btn small" type="button" data-stock-writeoff="${esc(row.product_id)}">Списати</button> <button class="btn small danger" type="button" data-stock-delete="${esc(row.product_id)}">Видалити</button> ` : "";
+      html += `<tr><td class="mono"><b>${esc(row.serial_number)}</b></td><td>${esc(row.model_name)}<small style="display:block;color:var(--muted)">${esc(row.model_code)}</small></td>
+        <td>${esc(dateText(row.received_at))}</td><td><span class="status ${css}">${esc(label)}</span>${service}${repeat}</td><td>${extra}</td>
+        <td>${fix}<button class="btn small" type="button" data-stock-history="${esc(row.product_id)}" data-serial="${esc(row.serial_number)}">Історія</button></td></tr>`;
+    }
+    $("#stock-body").innerHTML = html || '<tr><td colspan="6" class="empty">Нічого не знайдено</td></tr>';
+  }
+
+  async function editItem(productId) {
+    const row = lastRows.find(item => item.product_id === productId);
+    if (!row || !window.WarrioManage) return;
+    const model = modelList.find(item => item.code === row.model_code);
+    const values = await window.WarrioManage.form({
+      title: `Змінити ${row.serial_number}`, submit: "Зберегти",
+      fields: [
+        { id: "serial", label: "Серійний номер", value: row.serial_number, full: true },
+        { id: "model", label: "Модель", type: "select", value: model?.id, options: modelList.map(item => [item.id, `${item.name} (${item.code})`]) },
+        { id: "day", label: "День поставки", type: "date", value: dayKey(row.received_at) }
+      ]
+    });
+    if (!values) return;
+    try {
+      await window.WarrioData.rpc("update_warrio_stock_item", {
+        p_organization_id: context().organization.id, p_product_id: productId, p_model_id: values.model,
+        p_serial_number: values.serial, p_received_on: values.day || null, p_note: null
+      });
+      await loadList();
+      message("Зміни збережено.");
+    } catch (error) { message(errorText(error)); }
+  }
+
+  async function deleteItem(productId) {
+    const row = lastRows.find(item => item.product_id === productId);
+    if (!row || !window.WarrioManage) return;
+    const ok = await window.WarrioManage.ask({ title: "Видалити виріб зі складу?", text: `${row.serial_number} (${row.model_name}) буде видалено разом з історією. Це не можна скасувати. Використовуйте, якщо виріб додано помилково.`, confirm: "Так, видалити", danger: true });
+    if (!ok) return;
+    try {
+      await window.WarrioData.rpc("delete_warrio_stock_item", { p_organization_id: context().organization.id, p_product_id: productId });
+      await loadList();
+      message("Виріб видалено.");
+    } catch (error) { message(errorText(error)); }
   }
 
   async function load() {
