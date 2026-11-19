@@ -769,6 +769,16 @@
     if (el?.classList?.contains("auth-error") && el.textContent.trim()) { const v = el.closest(".auth-panel") || el.parentElement; v.classList.remove("fx-shake"); void v.offsetWidth; v.classList.add("fx-shake"); }
   })).observe(document.body, { subtree: true, childList: true, characterData: true });
 
+  // Give icon-only buttons an accessible name (screen readers, voice control, SEO a11y score).
+  function ariaNames() {
+    const names = { "fx-theme": "Темна / світла тема", "fx-sound": "Звук інтерфейсу", "fx-bell": "Сповіщення", "modal-close": "Закрити", "mobile-menu": "Меню" };
+    document.querySelectorAll("button,a[role=button],[role=button]").forEach(el => {
+      if (el.getAttribute("aria-label") || el.textContent.trim()) return;
+      const label = names[el.id] || (el.classList.contains("notifications") ? "Сповіщення" : "") || (el.classList.contains("fx-sel-btn") ? "Вибрати значення" : "") || el.title || el.dataset.tip || "";
+      if (label) el.setAttribute("aria-label", label);
+    });
+  }
+
   function start() {
     appReveal();
     rememberPage();
@@ -777,8 +787,8 @@
     if (host) host.prepend(sound(), theme());
     restructure(); icons(); notifications();
     document.querySelectorAll("select").forEach(enhanceSelect);
-    watch(); scan(); markAttention(); surfaces(); numbers(); plainSymbols(); labelTables(); fieldHints(); navLens(); modalSwipe();
-    new MutationObserver(() => { scan(); markAttention(); surfaces(); queueNumbers(); queueSymbols(); queueTables(); fieldHints(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
+    watch(); scan(); markAttention(); surfaces(); ariaNames(); numbers(); plainSymbols(); labelTables(); fieldHints(); navLens(); modalSwipe();
+    new MutationObserver(() => { scan(); markAttention(); surfaces(); ariaNames(); queueNumbers(); queueSymbols(); queueTables(); fieldHints(); restructure(); icons(); document.querySelectorAll("select:not([data-fx])").forEach(enhanceSelect); })
       .observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
