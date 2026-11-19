@@ -675,10 +675,10 @@ html[data-theme=dark] .fx-cmd-item.on{background:linear-gradient(180deg,rgba(140
 @media(max-width:760px){.fx-cmd{padding-top:calc(10vh + env(safe-area-inset-top))}.fx-cmd-foot{display:none}.fx-cmd-top input{font-size:16px}.fx-cmd-item{padding:12px}}
 
 /* ===== Cursor glow + grain ===== */
-.fx-glow{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(140,116,255,.2),transparent 62%)}
+.fx-glow{display:block;width:auto;height:auto;font-weight:400;position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(140,116,255,.2),transparent 62%)}
 *:hover>.fx-glow{opacity:1}
 html[data-theme=dark] .fx-glow{background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(160,140,255,.26),transparent 62%)}
-.fx-grain{position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:url(assets/noise.png?v=2);background-size:160px;opacity:.07;mix-blend-mode:overlay}
+.fx-grain{display:block;width:auto;height:auto;position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:url(assets/noise.png?v=2);background-size:160px;opacity:.07;mix-blend-mode:overlay}
 .auth-gate>.fx-grain{position:fixed;z-index:0;opacity:.09;border-radius:0}
 .stat,.dealer-card,.doc,.team-card{position:relative}
 html[data-theme=dark] .fx-grain{opacity:.1}
@@ -696,3 +696,22 @@ html[data-theme=dark] .fx-grain{opacity:.1}
 .fx-shake{animation:fxShake .5s cubic-bezier(.36,.07,.19,.97)}
 @media(prefers-reduced-motion:reduce){.fx-shake{animation:none}.fx-cmd-box{transition:none}}
 html .fx-cmd-top input,html .fx-cmd-top input:focus{border:0!important;background:transparent!important;box-shadow:none!important;outline:0!important;border-radius:0!important}
+
+/* manage.js dialogs, row actions, stock day groups */
+.wm-overlay{position:fixed;inset:0;z-index:1300;display:grid;place-items:center;padding:18px;background:rgba(24,16,52,.55);backdrop-filter:blur(6px)}
+.wm-card{width:100%;max-width:520px;max-height:90vh;overflow:auto;padding:22px;background:var(--card,#fff)}
+.wm-card h3{margin:0 0 8px}
+.wm-text{margin:0 0 14px;color:var(--muted);line-height:1.5}
+.wm-small{font-size:12px;margin-top:12px}
+.wm-error{margin:12px 0 0;padding:9px 12px;border-radius:10px;background:#fdecee;color:#b42318;font-size:14px}
+.wm-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.wm-list{display:grid;gap:8px;max-height:320px;overflow:auto;margin-top:10px}
+.wm-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:12px;background:var(--soft,#f4f1ff)}
+.wm-row small{display:block;color:var(--muted)}
+.wm-card .form-group[hidden]{display:none}
+.row-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn.danger,.danger-link{color:#b42318}
+.job-confirm{margin-top:10px;width:100%}
+tr.stock-day td{background:var(--soft,#f4f1ff);color:var(--ink,inherit);padding:8px 14px;font-size:13px}
+html[data-theme=dark] .wm-card{background:#1b1436;color:#ece8ff}
+html[data-theme=dark] .wm-row,html[data-theme=dark] tr.stock-day td{background:#262048}

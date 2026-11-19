@@ -738,12 +738,12 @@
   function surfaces() {
     const fine = matchMedia("(hover:hover) and (pointer:fine)").matches;
     document.querySelectorAll(".stat,.auth-gate,.dealer-card,.doc,.team-card").forEach(el => {
-      if (!el.querySelector(":scope > .fx-grain")) { const g = document.createElement("i"); g.className = "fx-grain"; g.setAttribute("aria-hidden", "true"); el.append(g); }
+      if (!el.querySelector(":scope > .fx-grain")) { const g = document.createElement("fx-fill"); g.className = "fx-grain"; g.setAttribute("aria-hidden", "true"); el.append(g); }
     });
     if (!fine) return;
     document.querySelectorAll(".stat,.dealer-card,.doc,.team-card,.quick-btn,.card[data-page-link]").forEach(el => {
       if (el.dataset.fxGlow) return; el.dataset.fxGlow = "1";
-      const g = document.createElement("i"); g.className = "fx-glow"; g.setAttribute("aria-hidden", "true"); el.append(g);
+      const g = document.createElement("fx-fill"); g.className = "fx-glow"; g.setAttribute("aria-hidden", "true"); el.append(g);
       el.addEventListener("pointermove", e => { const r = el.getBoundingClientRect(); el.style.setProperty("--mx", (e.clientX - r.left) + "px"); el.style.setProperty("--my", (e.clientY - r.top) + "px"); });
     });
   }
