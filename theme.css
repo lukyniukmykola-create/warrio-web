@@ -678,11 +678,11 @@ html[data-theme=dark] .fx-cmd-item.on{background:linear-gradient(180deg,rgba(140
 .fx-glow{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(140,116,255,.2),transparent 62%)}
 *:hover>.fx-glow{opacity:1}
 html[data-theme=dark] .fx-glow{background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(160,140,255,.26),transparent 62%)}
-.fx-grain{position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:url(assets/noise.png?v=1);background-size:160px;opacity:.07;mix-blend-mode:overlay}
+.fx-grain{position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:url(assets/noise.png?v=2);background-size:160px;opacity:.07;mix-blend-mode:overlay}
 .auth-gate>.fx-grain{position:fixed;z-index:0;opacity:.09;border-radius:0}
 .stat,.dealer-card,.doc,.team-card{position:relative}
 html[data-theme=dark] .fx-grain{opacity:.1}
-#warrio-intro:after{content:"";position:absolute;inset:0;background:url(assets/noise.png?v=1);background-size:160px;opacity:.09;mix-blend-mode:overlay;pointer-events:none}
+#warrio-intro:after{content:"";position:absolute;inset:0;background:url(assets/noise.png?v=2);background-size:160px;opacity:.09;mix-blend-mode:overlay;pointer-events:none}
 
 /* ===== Password meter and form shake ===== */
 .fx-meter{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px;align-items:center}
