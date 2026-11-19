@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Warrio — гарантії, які працюють самі</title>
+<meta name="description" content="Warrio: облік складу, продажів, гарантій, монтажів і сервісу в одному місці. PDF-гарантія з QR для кожного покупця.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f0a24">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'">
+<link rel="icon" href="../assets/warrio-mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="welcome.css?v=1">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><i class="grain"></i></div>
+
+<header class="top">
+  <a class="brand" href="./" aria-label="Warrio"><img src="../assets/warrio-mark.svg" alt="" width="34" height="34"><span>Warrio</span></a>
+  <nav aria-label="Розділи"><a href="#features">Можливості</a><a href="#flow">Як це працює</a><a href="#login">Вхід</a></nav>
+  <a class="btn ghost" href="../">Увійти</a>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Гарантії · Склад · Монтаж · Сервіс</p>
+      <h1>Гарантії, які<br><em>працюють самі</em></h1>
+      <p class="lead">Від серійного номера на складі до PDF з QR у покупця на пошті. Один сервіс замість таблиць, чатів і папок.</p>
+      <div class="cta"><a class="btn primary" href="../">Увійти до Warrio</a><a class="btn ghost" href="#flow">Побачити, як це працює</a></div>
+      <ul class="chips"><li>PDF + QR автоматично</li><li>Захист даних RLS</li><li>Українською</li></ul>
+    </div>
+
+    <div class="stage" id="stage" aria-label="Демонстрація роботи Warrio" role="img">
+      <div class="stage-glow" aria-hidden="true"></div>
+      <div class="prompt"><span id="typed"></span><i class="caret"></i></div>
+      <div class="scene" id="scene" aria-live="off"></div>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+      <button class="replay" id="replay" type="button" aria-label="Пауза або відтворення">Ⅱ</button>
+    </div>
+  </section>
+
+  <section id="features" class="block">
+    <h2>Усе, що потрібно для гарантій</h2>
+    <div class="grid">
+      <article class="card"><b>Склад</b><p>Прийом за SN списком чи CSV, групи за днем поставки, історія кожного виробу.</p></article>
+      <article class="card"><b>Продажі дилерів</b><p>Дилер реєструє продаж за хвилину. Помилки виправляються з підтвердженням.</p></article>
+      <article class="card"><b>Гарантія з QR</b><p>Покупець активує сам, а PDF і лист із QR надсилаються автоматично.</p></article>
+      <article class="card"><b>Монтажі</b><p>Номер, виконавець зі своїх або сторонній, швидке підтвердження одним кліком.</p></article>
+      <article class="card"><b>Сервіс</b><p>Звернення, статуси та повторні випадки по кожному серійному номеру.</p></article>
+      <article class="card"><b>Пошук за телефоном</b><p>Знайдіть усі гарантії клієнта за номером гарантії, SN, телефоном чи ім’ям.</p></article>
+    </div>
+  </section>
+
+  <section id="flow" class="block">
+    <h2>Шлях одного виробу</h2>
+    <ol class="steps">
+      <li><span>1</span><div><b>Прийняли на склад</b><p>Серійні номери додані — виріб з’явився в обліку.</p></div></li>
+      <li><span>2</span><div><b>Дилер продав</b><p>SN, модель, дата — і покупець отримує посилання.</p></div></li>
+      <li><span>3</span><div><b>Покупець активував</b><p>Гарантія WRR-… з PDF та QR на email.</p></div></li>
+      <li><span>4</span><div><b>Монтаж підтверджено</b><p>Гарантія стає активною, усе в журналі.</p></div></li>
+    </ol>
+  </section>
+
+  <section id="login" class="block login">
+    <div class="login-card">
+      <h2>Увійти до Warrio</h2>
+      <p>Доступ видає адміністратор вашої компанії. Увійдіть за email і паролем.</p>
+      <div class="cta center"><a class="btn primary big" href="../">Перейти до входу</a></div>
+      <small>Немає доступу? Зверніться до власника або адміністратора компанії.</small>
+    </div>
+  </section>
+</main>
+
+<footer><span>© Warrio</span><a href="../">Увійти</a></footer>
+<script src="welcome.js?v=1"></script>
+</body>
+</html>
