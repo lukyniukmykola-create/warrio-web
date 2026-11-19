@@ -6,18 +6,16 @@
 <title>Warrio — гарантії, які працюють самі</title>
 <meta name="description" content="Warrio: облік складу, продажів, гарантій, монтажів і сервісу в одному місці. PDF-гарантія з QR для кожного покупця.">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0f0a24">
+<meta name="theme-color" content="#eceef3">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'">
 <link rel="icon" href="../assets/warrio-mark.svg" type="image/svg+xml">
-<link rel="stylesheet" href="welcome.css?v=1">
+<link rel="stylesheet" href="welcome.css?v=2">
 </head>
 <body>
-<div class="bg" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i><i class="orb o3"></i><i class="grain"></i></div>
-
 <header class="top">
   <a class="brand" href="./" aria-label="Warrio"><img src="../assets/warrio-mark.svg" alt="" width="34" height="34"><span>Warrio</span></a>
   <nav aria-label="Розділи"><a href="#features">Можливості</a><a href="#flow">Як це працює</a><a href="#login">Вхід</a></nav>
-  <a class="btn ghost" href="../">Увійти</a>
+  <a class="btn" href="../">Увійти</a>
 </header>
 
 <main>
@@ -26,28 +24,31 @@
       <p class="eyebrow">Гарантії · Склад · Монтаж · Сервіс</p>
       <h1>Гарантії, які<br><em>працюють самі</em></h1>
       <p class="lead">Від серійного номера на складі до PDF з QR у покупця на пошті. Один сервіс замість таблиць, чатів і папок.</p>
-      <div class="cta"><a class="btn primary" href="../">Увійти до Warrio</a><a class="btn ghost" href="#flow">Побачити, як це працює</a></div>
+      <div class="cta"><a class="btn primary" href="../">Увійти до Warrio</a><a class="btn" href="#flow">Побачити, як це працює</a></div>
       <ul class="chips"><li>PDF + QR автоматично</li><li>Захист даних RLS</li><li>Українською</li></ul>
     </div>
 
     <div class="stage" id="stage" aria-label="Демонстрація роботи Warrio" role="img">
-      <div class="stage-glow" aria-hidden="true"></div>
-      <div class="prompt"><span id="typed"></span><i class="caret"></i></div>
-      <div class="scene" id="scene" aria-live="off"></div>
-      <div class="dots" id="dots" aria-hidden="true"></div>
-      <button class="replay" id="replay" type="button" aria-label="Пауза або відтворення">Ⅱ</button>
+      <div class="winbar" aria-hidden="true"><i></i><i></i><i></i><span>Warrio</span></div>
+      <div class="mini" aria-hidden="true"><div><small>На складі</small><b>128</b></div><div><small>Гарантій</small><b>94</b></div><div><small>Чекають монтаж</small><b>7</b></div></div>
+      <div class="pcard">
+        <div class="prompt"><span id="typed"></span><i class="caret"></i></div>
+        <div class="scene" id="scene" aria-live="off"></div>
+        <div class="dots" id="dots" aria-hidden="true"></div>
+        <button class="replay" id="replay" type="button" aria-label="Пауза або відтворення">Ⅱ</button>
+      </div>
     </div>
   </section>
 
   <section id="features" class="block">
     <h2>Усе, що потрібно для гарантій</h2>
     <div class="grid">
-      <article class="card"><b>Склад</b><p>Прийом за SN списком чи CSV, групи за днем поставки, історія кожного виробу.</p></article>
-      <article class="card"><b>Продажі дилерів</b><p>Дилер реєструє продаж за хвилину. Помилки виправляються з підтвердженням.</p></article>
-      <article class="card"><b>Гарантія з QR</b><p>Покупець активує сам, а PDF і лист із QR надсилаються автоматично.</p></article>
-      <article class="card"><b>Монтажі</b><p>Номер, виконавець зі своїх або сторонній, швидке підтвердження одним кліком.</p></article>
-      <article class="card"><b>Сервіс</b><p>Звернення, статуси та повторні випадки по кожному серійному номеру.</p></article>
-      <article class="card"><b>Пошук за телефоном</b><p>Знайдіть усі гарантії клієнта за номером гарантії, SN, телефоном чи ім’ям.</p></article>
+      <article class="card"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></div><b>Склад</b><p>Прийом за SN списком чи CSV, групи за днем поставки, історія кожного виробу.</p></article>
+      <article class="card"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><b>Продажі дилерів</b><p>Дилер реєструє продаж за хвилину. Помилки виправляються з підтвердженням.</p></article>
+      <article class="card"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 18h2v2h-2z"/></svg></div><b>Гарантія з QR</b><p>Покупець активує сам, а PDF і лист із QR надсилаються автоматично.</p></article>
+      <article class="card"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l4 4-9 9H5v-4z"/><path d="M12 8l4 4"/></svg></div><b>Монтажі</b><p>Номер, виконавець зі своїх або сторонній, швидке підтвердження одним кліком.</p></article>
+      <article class="card"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 00-6 6v3l-2 3h16l-2-3V9a6 6 0 00-6-6zM10 19a2 2 0 004 0"/></svg></div><b>Сервіс</b><p>Звернення, статуси та повторні випадки по кожному серійному номеру.</p></article>
+      <article class="card"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></div><b>Пошук за телефоном</b><p>Знайдіть усі гарантії клієнта за номером гарантії, SN, телефоном чи ім’ям.</p></article>
     </div>
   </section>
 
@@ -72,6 +73,6 @@
 </main>
 
 <footer><span>© Warrio</span><a href="../">Увійти</a></footer>
-<script src="welcome.js?v=1"></script>
+<script src="welcome.js?v=2"></script>
 </body>
 </html>
