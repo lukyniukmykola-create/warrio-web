@@ -84,6 +84,7 @@
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     message.className = "message"; message.textContent = "";
+    if (!document.querySelector("#consent").checked) { message.textContent = "Підтвердьте згоду з політикою конфіденційності."; return; }
     if (!configured()) { message.textContent = "Warrio Web ще не підключено до Supabase."; return; }
     submit.disabled = true; submit.textContent = "Активуємо…";
     try {
