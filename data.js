@@ -351,9 +351,9 @@
 
   const org = input => ({ p_organization_id: input.organizationId });
   const updateDealer = input => rpc("update_warrio_dealer", { ...org(input), p_dealer_id: input.dealerId, p_name: input.name, p_code: input.code || "", p_phone: input.phone || "", p_email: input.email || "", p_is_active: input.isActive ?? null });
-  const deleteDealer = input => rpc("delete_warrio_dealer", { ...org(input), p_dealer_id: input.dealerId });
+  const deleteDealer = input => rpc("delete_warrio_dealer", { ...org(input), p_dealer_id: input.dealerId, p_reason: input.reason });
   const updateCustomer = input => rpc("update_warrio_customer", { ...org(input), p_customer_id: input.customerId, p_full_name: input.fullName, p_phone: input.phone, p_email: input.email || "", p_address: input.address || "" });
-  const deleteCustomer = input => rpc("delete_warrio_customer", { ...org(input), p_customer_id: input.customerId });
+  const deleteCustomer = input => rpc("delete_warrio_customer", { ...org(input), p_customer_id: input.customerId, p_reason: input.reason });
   const planInstallation = input => rpc("plan_warrio_installation", { ...org(input), p_warranty_id: input.warrantyId, p_planned_for: input.plannedFor || null, p_assigned_user_id: input.assignedUserId || null, p_executor_name: input.executorName || null, p_executor_phone: input.executorPhone || null, p_executor_company: input.executorCompany || null, p_note: input.note || "" });
   const confirmInstallationItem = input => rpc("confirm_warrio_installation_item", { ...org(input), p_work_item_id: input.workItemId, p_installed_on: input.installedOn || null, p_comment: input.comment || "" });
 

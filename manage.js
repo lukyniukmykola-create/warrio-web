@@ -63,17 +63,41 @@
   }
   const unmount = () => document.querySelector("#wm-overlay")?.remove();
 
-  function ask({ title, text, confirm = "Так", danger = false }) {
+  // ask({title,text,confirm,danger,reason:{label,placeholder}}) -> false | true | reason string (min 5 chars)
+  function ask({ title, text, confirm = "Так", danger = false, reason = null }) {
     return new Promise(resolve => {
-      const overlay = mount(`<h3>${esc(title)}</h3><p class="wm-text">${esc(text)}</p><div class="wm-foot"><button class="btn" type="button" data-wm="no">Скасувати</button><button class="btn ${danger ? "danger" : "primary"}" type="button" data-wm="yes">${esc(confirm)}</button></div>`);
+      const reasonHtml = reason ? `<div class="form-group wm-reason"><label for="wm-reason">${esc(reason.label || "Причина")}</label><textarea id="wm-reason" rows="2" maxlength="500" placeholder="${esc(reason.placeholder || "Наприклад: помилковий запис")}"></textarea></div><p class="wm-error" role="alert" hidden></p>` : "";
+      const overlay = mount(`<h3>${esc(title)}</h3><p class="wm-text">${esc(text)}</p>${reasonHtml}<div class="wm-foot"><button class="btn" type="button" data-wm="no">Скасувати</button><button class="btn ${danger ? "danger" : "primary"}" type="button" data-wm="yes">${esc(confirm)}</button></div>`);
       const done = value => { document.removeEventListener("keydown", onKey); unmount(); resolve(value); };
       const onKey = event => { if (event.key === "Escape") done(false); };
       document.addEventListener("keydown", onKey);
       overlay.addEventListener("click", event => {
         const target = event.target.closest("[data-wm]");
-        if (target) done(target.dataset.wm === "yes");
-        else if (event.target === overlay) done(false);
+        if (!target) { if (event.target === overlay) done(false); return; }
+        if (target.dataset.wm !== "yes") return done(false);
+        if (!reason) return done(true);
+        const value = overlay.querySelector("#wm-reason").value.trim();
+        if (value.length < 5) {
+          const err = overlay.querySelector(".wm-error");
+          err.textContent = "Вкажіть причину (щонайменше 5 символів).";
+          err.hidden = false;
+          overlay.querySelector("#wm-reason").focus();
+          return;
+        }
+        done(value);
       });
+      (reason ? overlay.querySelector("#wm-reason") : overlay.querySelector('[data-wm="no"]')).focus();
+    });
+  }
+
+  // read-only dialog (history etc.): html must already be escaped
+  function info({ title, html, close = "Закрити" }) {
+    return new Promise(resolve => {
+      const overlay = mount(`<h3>${esc(title)}</h3><div class="wm-body">${html}</div><div class="wm-foot"><button class="btn primary" type="button" data-wm="no">${esc(close)}</button></div>`);
+      const done = () => { document.removeEventListener("keydown", onKey); unmount(); resolve(); };
+      const onKey = event => { if (event.key === "Escape") done(); };
+      document.addEventListener("keydown", onKey);
+      overlay.addEventListener("click", event => { if (event.target === overlay || event.target.closest("[data-wm]")) done(); });
       overlay.querySelector('[data-wm="no"]').focus();
     });
   }
@@ -139,7 +163,8 @@
     work_item_not_found: "Монтаж не знайдено.",
     work_item_closed: "Цей монтаж уже закрито.",
     product_already_sold: "Проданий виріб змінити не можна.",
-    model_not_found: "Модель не знайдено."
+    model_not_found: "Модель не знайдено.",
+    reason_required: "Вкажіть причину (щонайменше 5 символів)."
   };
   function errorText(error) {
     const code = String(error?.message || "");
@@ -180,11 +205,11 @@
     if (!dealer) return;
     const hasSales = (live().sales || []).some(sale => sale.dealer_id === id);
     const ok = await ask({
-      title: `Видалити дилера «${dealer.name}»?`, danger: true, confirm: "Так, видалити",
+      title: `Видалити дилера «${dealer.name}»?`, danger: true, confirm: "Так, видалити", reason: { label: "Чому видаляєте дилера?" },
       text: hasSales ? "У дилера є продажі. Щоб не втратити історію, його буде вимкнено (не показуватиметься у нових продажах). Продовжити?" : "Дилера буде видалено без можливості відновлення. Продовжити?"
     });
     if (!ok) return;
-    const result = await run(() => window.WarrioData.deleteDealer({ organizationId: orgId(), dealerId: id }), "Готово");
+    const result = await run(() => window.WarrioData.deleteDealer({ organizationId: orgId(), dealerId: id, reason: ok }), "Готово");
     if (result === "deactivated") notify("Дилера вимкнено", "Є історія продажів, тому запис збережено як неактивний.");
     else if (result) notify("Дилера видалено");
   }
@@ -211,9 +236,9 @@
   async function deleteCustomer(id) {
     const customer = (live().customers || []).find(item => item.id === id);
     if (!customer) return;
-    const ok = await ask({ title: `Видалити клієнта «${customer.full_name}»?`, text: "Контактні дані клієнта буде видалено без можливості відновлення. Ви впевнені?", confirm: "Так, видалити", danger: true });
+    const ok = await ask({ title: `Видалити клієнта «${customer.full_name}»?`, text: "Контактні дані клієнта буде видалено без можливості відновлення.", confirm: "Так, видалити", danger: true, reason: { label: "Чому видаляєте клієнта?" } });
     if (!ok) return;
-    if (await run(() => window.WarrioData.deleteCustomer({ organizationId: orgId(), customerId: id }), "Клієнта видалено")) document.querySelector("#modal-overlay")?.classList.remove("open");
+    if (await run(() => window.WarrioData.deleteCustomer({ organizationId: orgId(), customerId: id, reason: ok }), "Клієнта видалено")) document.querySelector("#modal-overlay")?.classList.remove("open");
   }
 
   // ---------- installations ----------
@@ -320,5 +345,5 @@
     })[target.dataset.manage]?.(id);
   }, true);
 
-  window.WarrioManage = { ask, form, eventLabel, entityLabel, eventDetail, findWarranties, digits, canManage: isAdmin };
+  window.WarrioManage = { ask, info, form, eventLabel, entityLabel, eventDetail, findWarranties, digits, canManage: isAdmin };
 })();
