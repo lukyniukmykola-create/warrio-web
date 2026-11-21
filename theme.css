@@ -1,13 +1,13 @@
 /* Warrio "Soft Lilac" skin: floating rounded cards on a grey-violet backdrop, fast springy motion. */
-:root{--bg:#eceef3;--ink:#17142b;--muted:#77748c;--line:#e5e3ef;--violet:#6a52f5;--violet2:#8a76ff;--soft:#ece8ff;--tint:#e4defc;--night:#1d1736;--r:22px;--spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.22,1,.36,1)}
+:root{--bg:#eceef3;--ink:#17142b;--muted:#5f5c76;--line:#e5e3ef;--violet:#6a52f5;--violet2:#8a76ff;--soft:#ece8ff;--tint:#e4defc;--night:#1d1736;--r:22px;--spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.22,1,.36,1)}
 html,body{background:radial-gradient(900px 520px at 8% -8%,#dcd6fb 0,transparent 60%),radial-gradient(800px 520px at 100% 108%,#d7dcf3 0,transparent 60%),#e9ebf1!important;color:var(--ink)}
 body{padding:28px!important}
 .app{max-width:1520px!important;border:0!important;border-radius:30px!important;background:#f4f4f8!important;box-shadow:0 40px 110px rgba(52,40,110,.18),0 2px 0 rgba(255,255,255,.8) inset!important;animation:app-in .6s var(--ease) both}
 @keyframes app-in{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
 .sidebar{height:calc(100vh - 56px)!important;overflow-y:auto;background:transparent!important;border-right:1px solid rgba(23,20,43,.06)!important;backdrop-filter:none!important;padding:22px 14px 16px!important}
 .brand{color:var(--ink)}
-.menu-title{color:#a29fb8!important;letter-spacing:.12em!important}
-.nav-btn{border-radius:14px!important;color:#6b6883!important;min-height:44px!important;transition:background .15s,color .15s,transform .25s var(--spring)!important}
+.menu-title{color:#625f7a!important;letter-spacing:.12em!important}
+.nav-btn{border-radius:14px!important;color:#5f5c76!important;min-height:44px!important;transition:background .15s,color .15s,transform .25s var(--spring)!important}
 .nav-btn:hover{background:rgba(106,82,245,.07)!important;color:var(--ink)!important;transform:translateX(3px)}
 .nav-btn.active{background:var(--tint)!important;color:#2a1f6b!important;box-shadow:none!important}
 .nav-btn.active .ico{color:var(--violet)}
@@ -715,3 +715,8 @@ html .fx-cmd-top input,html .fx-cmd-top input:focus{border:0!important;backgroun
 tr.stock-day td{background:var(--soft,#f4f1ff);color:var(--ink,inherit);padding:8px 14px;font-size:13px}
 html[data-theme=dark] .wm-card{background:#1b1436;color:#ece8ff}
 html[data-theme=dark] .wm-row,html[data-theme=dark] tr.stock-day td{background:#262048}
+
+/* a11y: keyboard focus + skip link */
+.skip-link{position:absolute;left:-999px;top:8px;background:#5b45f7;color:#fff;padding:10px 14px;border-radius:10px;z-index:9999;font-weight:700}.skip-link:focus{left:8px}
+a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible,[role=button]:focus-visible,[tabindex]:focus-visible{outline:3px solid #6a52f5;outline-offset:2px}
+html[data-theme=dark] a:focus-visible,html[data-theme=dark] button:focus-visible,html[data-theme=dark] select:focus-visible{outline-color:#b6a9ff}

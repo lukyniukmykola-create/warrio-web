@@ -1,2 +1,11 @@
+# Публічні сторінки відкриті; кабінет, активація, перевірка й сервіс не індексуються (також через meta robots).
 User-agent: *
-Disallow: /
+Allow: /welcome/
+Allow: /privacy/
+Allow: /terms/
+Disallow: /activate/
+Disallow: /verify/
+Disallow: /service/
+Disallow: /platform/
+
+Sitemap: https://lukyniukmykola-create.github.io/warrio-web/sitemap.xml
