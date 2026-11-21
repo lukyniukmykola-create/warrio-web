@@ -1,12 +1,12 @@
 /* Warrio welcome — "Soft Lilac": same tokens as the app (theme.css). White + violet. */
-:root{--bg:#eceef3;--ink:#17142b;--mut:#77748c;--line:#e5e3ef;--v:#6a52f5;--v2:#8a76ff;--soft:#ece8ff;--tint:#e4defc;--night:#1d1736;--r:22px;--spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.22,1,.36,1);--sh:0 1px 2px rgba(40,30,90,.04),0 10px 30px rgba(40,30,90,.06)}
+:root{--bg:#eceef3;--ink:#17142b;--mut:#5f5c76;--line:#e5e3ef;--v:#6a52f5;--v2:#8a76ff;--soft:#ece8ff;--tint:#e4defc;--night:#1d1736;--r:22px;--spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.22,1,.36,1);--sh:0 1px 2px rgba(40,30,90,.04),0 10px 30px rgba(40,30,90,.06)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
 body{margin:0;color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;background:radial-gradient(900px 520px at 8% -8%,#dcd6fb 0,transparent 60%),radial-gradient(800px 520px at 100% 108%,#d7dcf3 0,transparent 60%),#e9ebf1;background-attachment:fixed}
 a{color:inherit;text-decoration:none}
 .top{display:flex;align-items:center;gap:24px;max-width:1160px;margin:0 auto;padding:18px 22px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.02em}
 .top nav{display:flex;gap:6px;margin-left:auto;font-size:15px}
-.top nav a{padding:8px 14px;border-radius:999px;color:#6b6883;transition:background .15s,color .15s}
+.top nav a{padding:8px 14px;border-radius:999px;color:#5f5c76;transition:background .15s,color .15s}
 .top nav a:hover{background:rgba(106,82,245,.08);color:var(--ink)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border-radius:999px;font-weight:600;font-size:15px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;transition:transform .25s var(--spring),box-shadow .2s,background .15s}
 .btn:hover{transform:translateY(-2px) scale(1.02)}.btn:active{transform:scale(.95)}
@@ -29,7 +29,7 @@ h1 em{font-style:normal;color:var(--v)}
 @keyframes appIn{from{opacity:0;transform:translateY(18px) scale(.985)}}
 .winbar{display:flex;align-items:center;gap:6px;padding:2px 4px}
 .winbar i{width:9px;height:9px;border-radius:50%;background:#d9d6e8}
-.winbar span{margin-left:auto;font-size:12px;color:#a29fb8;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.winbar span{margin-left:auto;font-size:12px;color:#625f7a;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
 .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .mini div{background:#fff;border-radius:18px;padding:12px 14px;box-shadow:var(--sh)}
 .mini div:first-child{background:var(--tint)}
@@ -90,3 +90,6 @@ footer a:hover{color:var(--v)}
 @media(max-width:900px){.hero{grid-template-columns:1fr;min-height:0;padding-top:20px}.grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr 1fr}.top nav{display:none}.top .btn{margin-left:auto}}
 @media(max-width:560px){.grid,.steps{grid-template-columns:1fr}.lead{font-size:17px}.stage{padding:14px}.mini b{font-size:20px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+
+.skip{position:absolute;left:-999px;top:8px;background:#5b45f7;color:#fff;padding:10px 14px;border-radius:10px;z-index:99}.skip:focus{left:8px}a:focus-visible,button:focus-visible{outline:3px solid #5b45f7;outline-offset:3px}footer nav{display:flex;gap:16px;flex-wrap:wrap}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
