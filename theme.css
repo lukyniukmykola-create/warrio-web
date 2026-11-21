@@ -720,3 +720,40 @@ html[data-theme=dark] .wm-row,html[data-theme=dark] tr.stock-day td{background:#
 .skip-link{position:absolute;left:-999px;top:8px;background:#5b45f7;color:#fff;padding:10px 14px;border-radius:10px;z-index:9999;font-weight:700}.skip-link:focus{left:8px}
 a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible,[role=button]:focus-visible,[tabindex]:focus-visible{outline:3px solid #6a52f5;outline-offset:2px}
 html[data-theme=dark] a:focus-visible,html[data-theme=dark] button:focus-visible,html[data-theme=dark] select:focus-visible{outline-color:#b6a9ff}
+
+/* ===== UI polish 2026-11-21 ===== */
+/* soft, non-bouncy hover: no lifting or scaling, rows never overlap */
+.quick-btn,.attention-row,.card[data-page-link],.doc,.dealer-card,.team-card,.stat,.btn,.nav-btn,.sidebar #user-menu{transition:background-color .28s ease,box-shadow .28s ease,color .2s ease,border-color .2s ease,transform .28s ease!important}
+.attention-row:hover,.quick-btn:hover{transform:none!important;background:var(--soft)!important;box-shadow:inset 0 0 0 1px rgba(106,82,245,.22),0 6px 20px rgba(106,82,245,.10)!important}
+.attention-row{margin:0 0 8px}
+.attention-row:last-child{margin-bottom:0}
+.stat:hover,.card[data-page-link]:hover,.doc:hover,.dealer-card:hover,.team-card:hover{transform:translateY(-1px)!important;box-shadow:0 10px 28px rgba(60,44,150,.12)!important}
+.btn:hover{transform:none!important;filter:brightness(1.03);box-shadow:0 6px 18px rgba(60,44,150,.14)}
+.nav-btn:hover{transform:none!important}
+.sidebar #user-menu:hover{transform:none!important}
+.quick-btn:active,.attention-row:active,.card[data-page-link]:active,.doc:active{transform:scale(.99)!important}
+/* textareas: no resize grip */
+textarea{resize:none!important}
+/* spacing: buttons never touch the fields above them */
+.form-grid+.btn,.form-grid+button,#stock-receive,#service-create{margin-top:18px}
+#service-new-toggle{margin:6px 0 18px}
+.page-head+p,#service-msg{margin-bottom:12px}
+#stock-file-name{padding-left:2px}
+/* dialogs: light glass, soft fade, no black screen */
+.wm-overlay{background:rgba(232,228,255,.38)!important;-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);animation:wmFade .22s ease both}
+.wm-card{background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(250,248,255,.84))!important;border:1px solid rgba(255,255,255,.8)!important;border-radius:26px!important;box-shadow:0 30px 80px rgba(60,44,150,.22),inset 0 1.5px 0 #fff!important;animation:wmPop .3s cubic-bezier(.2,.8,.2,1) both}
+.wm-card h3{font-size:20px}
+.wm-reason{margin-top:4px}
+.wm-reason textarea{min-height:76px}
+.wm-body{max-height:50vh;overflow:auto}
+.wm-timeline{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:0;counter-reset:wm}
+.wm-timeline li{position:relative;padding:10px 0 10px 28px;border-left:2px solid rgba(106,82,245,.18);margin-left:7px}
+.wm-timeline li:before{content:"";position:absolute;left:-7px;top:15px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #6a52f5}
+.wm-timeline li b{display:block;font-weight:650}
+.wm-timeline li span{color:var(--muted);font-size:13px}
+@keyframes wmFade{from{opacity:0}to{opacity:1}}
+@keyframes wmPop{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+html[data-theme=dark] .wm-overlay{background:rgba(12,8,30,.5)!important}
+html[data-theme=dark] .wm-card{background:linear-gradient(180deg,rgba(60,48,115,.9),rgba(24,17,52,.9))!important;border-color:rgba(255,255,255,.14)!important}
+html[data-theme=dark] .wm-timeline li:before{background:#1b1436}
+@media(prefers-reduced-motion:reduce){.wm-overlay,.wm-card{animation:none!important}}

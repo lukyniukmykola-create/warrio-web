@@ -89,11 +89,11 @@ begin
     format('select public.receive_warrio_stock(%L, %L, array[%L], %L)', oa, ma, 'ZZ-X-0001', 'n'),
     format('select public.register_warrio_sale(%L, %L, %L, %L, NULL, current_date)', oa, 'ZZ-A-0002', 'TST1', d1),
     format('select public.update_warrio_dealer(%L, %L, %L, %L, NULL, NULL, true)', oa, d2, 'hack', 'ZHK'),
-    format('select public.delete_warrio_dealer(%L, %L)', oa, d2),
+    format('select public.delete_warrio_dealer(%L, %L, %L)', oa, d2, 'test reason'),
     format('select public.update_warrio_customer(%L, %L, %L, NULL, NULL, NULL)', oa, cid, 'hack'),
-    format('select public.delete_warrio_customer(%L, %L)', oa, cid),
+    format('select public.delete_warrio_customer(%L, %L, %L)', oa, cid, 'test reason'),
     format('select public.update_warrio_stock_item(%L, %L, %L, %L, current_date, %L)', oa, pid2, ma, 'ZZ-A-9999', 'x'),
-    format('select public.delete_warrio_stock_item(%L, %L)', oa, pid3),
+    format('select public.delete_warrio_stock_item(%L, %L, %L)', oa, pid3, 'test reason'),
     format('select public.write_off_warrio_stock_item(%L, %L)', pid3, 'x'),
     format('select * from public.plan_warrio_installation(%L, %L, current_date, NULL, %L, %L, %L, %L)', oa, wid, 'x', '1', 'x', 'x'),
     format('select public.confirm_warrio_installation_item(%L, %L, current_date, %L)', oa, wi, 'x'),
@@ -129,7 +129,7 @@ begin
     'select public.finish_warrio_notification(1, NULL)',
     format('select * from public.get_warrio_stock(%L, NULL, NULL, 5)', oa),
     format('select public.update_warrio_dealer(%L, %L, %L, %L, NULL, NULL, true)', oa, d2, 'hack', 'ZHK'),
-    format('select public.delete_warrio_stock_item(%L, %L)', oa, pid3)
+    format('select public.delete_warrio_stock_item(%L, %L, %L)', oa, pid3, 'test reason')
   ] loop
     res := res || pg_temp.t_run('anon denied: ' || left(s, 60), null, 'anon', s, 'deny') || E'\n';
   end loop;
@@ -143,13 +143,13 @@ begin
 
   -- ===== role checks: dealer member of A =====
   foreach s in array array[
-    format('select public.delete_warrio_stock_item(%L, %L)', oa, pid3),
+    format('select public.delete_warrio_stock_item(%L, %L, %L)', oa, pid3, 'test reason'),
     format('select public.update_warrio_stock_item(%L, %L, %L, %L, current_date, %L)', oa, pid2, ma, 'ZZ-A-9998', 'x'),
     format('select public.receive_warrio_stock(%L, %L, array[%L], %L)', oa, ma, 'ZZ-X-0002', 'n'),
-    format('select public.delete_warrio_dealer(%L, %L)', oa, d2),
+    format('select public.delete_warrio_dealer(%L, %L, %L)', oa, d2, 'test reason'),
     format('select public.update_warrio_dealer(%L, %L, %L, %L, NULL, NULL, true)', oa, d2, 'hack', 'ZHK'),
     format('select public.update_warrio_customer(%L, %L, %L, NULL, NULL, NULL)', oa, cid, 'hack'),
-    format('select public.delete_warrio_customer(%L, %L)', oa, cid),
+    format('select public.delete_warrio_customer(%L, %L, %L)', oa, cid, 'test reason'),
     format('select * from public.plan_warrio_installation(%L, %L, current_date, NULL, %L, %L, %L, %L)', oa, wid, 'x', '1', 'x', 'x'),
     format('select public.update_warrio_organization_settings(%L, %L, NULL, NULL, NULL, NULL)', oa, 'hack'),
     format('select public.set_warrio_access_settings(%L, true, true)', oa),
@@ -159,18 +159,21 @@ begin
   end loop;
 
   -- ===== functional checks of migration 025 (owner A) =====
+  res := res || pg_temp.t_run('delete without reason blocked (dealer)', ua, 'authenticated', format('select public.delete_warrio_dealer(%L, %L, %L)', oa, d2, ''), 'err') || E'\n';
+  res := res || pg_temp.t_run('delete without reason blocked (customer)', ua, 'authenticated', format('select public.delete_warrio_customer(%L, %L, %L)', oa, cid, 'abc'), 'err') || E'\n';
+  res := res || pg_temp.t_run('delete without reason blocked (stock)', ua, 'authenticated', format('select public.delete_warrio_stock_item(%L, %L, NULL)', oa, pid3), 'err') || E'\n';
   res := res || pg_temp.t_run('update_warrio_dealer', ua, 'authenticated', format('select public.update_warrio_dealer(%L, %L, %L, %L, NULL, NULL, true)', oa, d2, 'Dealer Two B', 'ZD2B'), 'ok') || E'\n';
   select name into s from public.dealers where id = d2;
   res := res || case when s = 'Dealer Two B' then 'PASS' else 'FAIL' end || ': dealer name changed' || E'\n';
-  res := res || pg_temp.t_run('delete_warrio_dealer (no sales)', ua, 'authenticated', format('select public.delete_warrio_dealer(%L, %L)', oa, d2), 'ok') || E'\n';
+  res := res || pg_temp.t_run('delete_warrio_dealer (no sales)', ua, 'authenticated', format('select public.delete_warrio_dealer(%L, %L, %L)', oa, d2, 'test reason'), 'ok') || E'\n';
   res := res || case when not exists (select 1 from public.dealers where id = d2) then 'PASS' else 'FAIL' end || ': dealer without sales deleted' || E'\n';
-  res := res || pg_temp.t_run('delete_warrio_dealer (with sales)', ua, 'authenticated', format('select public.delete_warrio_dealer(%L, %L)', oa, d1), 'ok') || E'\n';
+  res := res || pg_temp.t_run('delete_warrio_dealer (with sales)', ua, 'authenticated', format('select public.delete_warrio_dealer(%L, %L, %L)', oa, d1, 'test reason'), 'ok') || E'\n';
   res := res || case when exists (select 1 from public.dealers where id = d1 and not is_active) then 'PASS' else 'FAIL' end || ': dealer with sales deactivated, not deleted' || E'\n';
-  res := res || pg_temp.t_run('delete sold stock blocked', ua, 'authenticated', format('select public.delete_warrio_stock_item(%L, %L)', oa, pid1), 'err') || E'\n';
+  res := res || pg_temp.t_run('delete sold stock blocked', ua, 'authenticated', format('select public.delete_warrio_stock_item(%L, %L, %L)', oa, pid1, 'test reason'), 'err') || E'\n';
   res := res || pg_temp.t_run('edit sold stock blocked', ua, 'authenticated', format('select public.update_warrio_stock_item(%L, %L, %L, %L, current_date, %L)', oa, pid1, ma, 'ZZ-A-7777', 'x'), 'err') || E'\n';
   res := res || pg_temp.t_run('update_warrio_stock_item', ua, 'authenticated', format('select public.update_warrio_stock_item(%L, %L, %L, %L, current_date, %L)', oa, pid2, ma, 'ZZ-A-0002B', 'n'), 'ok') || E'\n';
   res := res || case when exists (select 1 from public.products where id = pid2 and serial_number = 'ZZ-A-0002B') then 'PASS' else 'FAIL' end || ': stock serial changed' || E'\n';
-  res := res || pg_temp.t_run('delete_warrio_stock_item (unsold)', ua, 'authenticated', format('select public.delete_warrio_stock_item(%L, %L)', oa, pid3), 'ok') || E'\n';
+  res := res || pg_temp.t_run('delete_warrio_stock_item (unsold)', ua, 'authenticated', format('select public.delete_warrio_stock_item(%L, %L, %L)', oa, pid3, 'test reason'), 'ok') || E'\n';
   res := res || case when not exists (select 1 from public.products where id = pid3) then 'PASS' else 'FAIL' end || ': unsold stock deleted' || E'\n';
   res := res || case when exists (select 1 from public.work_items where id = wi and item_no is not null and executor_name = 'Ivan' and executor_company = 'Firm') then 'PASS' else 'FAIL' end || ': planned installation has number and executor' || E'\n';
   res := res || pg_temp.t_run('plan installation twice blocked', ua, 'authenticated', format('select * from public.plan_warrio_installation(%L, %L, current_date + 2, NULL, %L, %L, %L, %L)', oa, wid, 'Ivan', '+380501234567', 'Firm', 'n'), 'err') || E'\n';
@@ -178,7 +181,7 @@ begin
   res := res || case when exists (select 1 from public.work_items where id = wi and status = 'done') then 'PASS' else 'FAIL' end || ': work item closed after confirmation' || E'\n';
   res := res || case when exists (select 1 from public.installations where warranty_id = wid) then 'PASS' else 'FAIL' end || ': installation recorded' || E'\n';
   res := res || pg_temp.t_run('confirm installation twice blocked', ua, 'authenticated', format('select public.confirm_warrio_installation_item(%L, %L, current_date, %L)', oa, wi, 'ok'), 'err') || E'\n';
-  res := res || pg_temp.t_run('delete customer with warranty blocked', ua, 'authenticated', format('select public.delete_warrio_customer(%L, %L)', oa, cid), 'err') || E'\n';
+  res := res || pg_temp.t_run('delete customer with warranty blocked', ua, 'authenticated', format('select public.delete_warrio_customer(%L, %L, %L)', oa, cid, 'test reason'), 'err') || E'\n';
   res := res || pg_temp.t_run('update_warrio_customer', ua, 'authenticated', format('select public.update_warrio_customer(%L, %L, %L, %L, %L, %L)', oa, cid, 'New Name', '+380509998877', 'new@test.invalid', 'Lviv'), 'ok') || E'\n';
   res := res || case when exists (select 1 from public.customers where id = cid and full_name = 'New Name') then 'PASS' else 'FAIL' end || ': customer updated' || E'\n';
 

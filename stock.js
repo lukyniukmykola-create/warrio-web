@@ -15,7 +15,8 @@
     warranty_issued: "Видано гарантію",
     service_opened: "Відкрито звернення",
     service_closed: "Звернення закрито",
-    written_off: "Списано"
+    written_off: "Списано",
+    edited: "Змінено дані"
   };
   const OUTCOMES = {
     received: "додано",
@@ -96,19 +97,11 @@
           </div>
         </div>
         <div class="card table-card" style="margin-top:18px"><div class="table-wrap"><table class="table"><thead><tr><th>Серійний номер</th><th>Модель</th><th>Прийнято</th><th>Статус</th><th>Дилер / гарантія</th><th></th></tr></thead><tbody id="stock-body"></tbody></table></div></div>
-        <div id="stock-history" hidden style="position:fixed;inset:0;z-index:1000;background:rgba(20,27,47,.55);display:none;align-items:center;justify-content:center;padding:18px" role="dialog" aria-modal="true" aria-labelledby="stock-history-title">
-          <div class="card" style="max-width:560px;width:100%;max-height:85vh;overflow:auto;padding:22px;background:var(--card,#fff)">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h3 id="stock-history-title" style="margin:0">Історія</h3><button class="btn small" type="button" id="stock-history-close">Закрити</button></div>
-            <ol id="stock-history-list" style="padding-left:18px;line-height:1.8;margin-bottom:0"></ol>
-          </div>
-        </div>
       </section>`);
     $("#stock-receive").addEventListener("click", receive);
     $("#stock-file").addEventListener("change", readFile);
     $("#stock-labels-open").addEventListener("click", openLabels);
-    $("#stock-history-close").addEventListener("click", closeHistory);
-    bindOutsideClose($("#stock-history"), $("#stock-history > *"), closeHistory);
-    document.addEventListener("keydown", event => { if (event.key === "Escape") { closeHistory(); closeLabels(); } });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") { closeLabels(); } });
     $("#stock-filter").closest(".form-group")?.insertAdjacentHTML("afterend",
       '<div class="form-group"><label for="stock-day">День поставки</label><input id="stock-day" type="date"></div>' +
       '<div class="form-group"><label for="stock-group">Вигляд списку</label><select id="stock-group"><option value="days">Групувати за днем поставки</option><option value="">Одним списком</option></select></div>');
@@ -212,10 +205,10 @@
   async function deleteItem(productId) {
     const row = lastRows.find(item => item.product_id === productId);
     if (!row || !window.WarrioManage) return;
-    const ok = await window.WarrioManage.ask({ title: "Видалити виріб зі складу?", text: `${row.serial_number} (${row.model_name}) буде видалено разом з історією. Це не можна скасувати. Використовуйте, якщо виріб додано помилково.`, confirm: "Так, видалити", danger: true });
+    const ok = await window.WarrioManage.ask({ title: "Видалити виріб зі складу?", text: `${row.serial_number} (${row.model_name}) буде видалено разом з історією. Це не можна скасувати. Використовуйте, якщо виріб додано помилково.`, confirm: "Так, видалити", danger: true, reason: { label: "Чому видаляєте виріб?", placeholder: "Наприклад: додано помилково" } });
     if (!ok) return;
     try {
-      await window.WarrioData.rpc("delete_warrio_stock_item", { p_organization_id: context().organization.id, p_product_id: productId });
+      await window.WarrioData.rpc("delete_warrio_stock_item", { p_organization_id: context().organization.id, p_product_id: productId, p_reason: ok });
       await loadList();
       message("Виріб видалено.");
     } catch (error) { message(errorText(error)); }
@@ -322,34 +315,29 @@
 
   function closeLabels() { $("#stock-labels")?.remove(); }
 
-  function closeHistory() {
-    const modal = $("#stock-history");
-    if (!modal) return;
-    modal.hidden = true;
-    modal.style.display = "none";
-  }
-
   async function showHistory(productId, serial) {
     try {
       const rows = await window.WarrioData.rpc("get_warrio_product_history", { p_product_id: productId });
-      $("#stock-history-title").textContent = `Історія ${serial}`;
-      $("#stock-history-list").innerHTML = (rows || []).map(row => {
+      const html = (rows || []).map(row => {
         const meta = row.metadata || {};
         const detail = [row.note, meta.dealer, meta.warranty_number].filter(Boolean).map(esc).join(" · ");
-        return `<li><b>${esc(EVENTS[row.event_type] || row.event_type)}</b> · ${esc(dateText(row.created_at))}${detail ? ` · ${detail}` : ""}</li>`;
-      }).join("") || "<li>Подій ще немає.</li>";
-      const modal = $("#stock-history");
-      modal.hidden = false;
-      modal.style.display = "flex";
-      $("#stock-history-close").focus();
+        return `<li><b>${esc(EVENTS[row.event_type] || row.event_type)}</b><span>${esc(dateText(row.created_at))}${detail ? ` · ${detail}` : ""}</span></li>`;
+      }).join("") || "<li><span>Подій ще немає.</span></li>";
+      await window.WarrioManage.info({ title: `Історія ${serial}`, html: `<ol class="wm-timeline">${html}</ol>` });
     } catch (error) { message(errorText(error)); }
   }
 
   async function writeOff(productId) {
-    const reason = window.prompt("Причина списання (наприклад, пошкоджено при транспортуванні):");
-    if (!reason || !reason.trim()) return;
+    const row = lastRows.find(item => item.product_id === productId);
+    const reason = await window.WarrioManage.ask({
+      title: `Списати ${row ? row.serial_number : "виріб"}?`,
+      text: "Виріб залишиться в історії, але його не можна буде продати.",
+      confirm: "Так, списати", danger: true,
+      reason: { label: "Причина списання", placeholder: "Наприклад: пошкоджено при транспортуванні" }
+    });
+    if (!reason) return;
     try {
-      await window.WarrioData.rpc("write_off_warrio_stock_item", { p_product_id: productId, p_reason: reason.trim() });
+      await window.WarrioData.rpc("write_off_warrio_stock_item", { p_product_id: productId, p_reason: reason });
       await loadList();
       message("Виріб списано.");
     } catch (error) { message(errorText(error)); }
