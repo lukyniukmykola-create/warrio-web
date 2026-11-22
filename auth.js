@@ -188,6 +188,7 @@
 
   window.WarrioAuth = Object.freeze({
     configured, initialize, signIn, signUp, sendPasswordRecovery, updatePassword, signOut,
-    refresh, getSession, accessToken
+    refresh, getSession, accessToken,
+    hasStoredSession: () => !!readStored()
   });
 })();
