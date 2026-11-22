@@ -63,7 +63,20 @@
     </div>`);
 
   const gate = document.querySelector("#auth-gate");
-  const view = name => document.querySelectorAll("[data-auth-view]").forEach(item => { item.hidden = item.dataset.authView !== name; });
+  document.documentElement.classList.remove("pre-auth");
+  const view = name => {
+    document.querySelectorAll("[data-auth-view]").forEach(item => { item.hidden = item.dataset.authView !== name; });
+    if (name !== "none") gate.classList.remove("restoring");
+  };
+  // Open the section the person had before a refresh (saved by WarrioApp.page).
+  function restorePage() {
+    let saved = "";
+    try { saved = localStorage.getItem("warrio-page") || ""; } catch { /* ignore */ }
+    if (!saved || saved === "dashboard" || saved === "activation") return;
+    const button = Array.from(document.querySelectorAll(".nav-btn[data-page]")).find(item => item.dataset.page === saved);
+    if (button && !button.hidden && window.WarrioApp?.page) window.WarrioApp.page(saved, { instant: true });
+  }
+  function closeGate() { restorePage(); gate.classList.remove("restoring"); gate.hidden = true; }
   const setBusy = (form, busy) => { const button = form.querySelector("button[type=submit]"); if(!button.dataset.label)button.dataset.label=button.textContent;button.disabled = busy; button.textContent = busy ? "Зачекайте…" : button.dataset.label; };
   const errorText = error => {
     const raw = String(error?.message || "").toLowerCase();
@@ -102,8 +115,9 @@
     if (!allowed.includes(document.querySelector(".page.active")?.id?.replace("page-", ""))) document.querySelector('.nav-btn[data-page="dashboard"]')?.click();
   }
 
-  async function enterLiveMode() {
-    view("loading"); gate.hidden = false;
+  async function enterLiveMode(silent = false) {
+    if (!silent) view("loading");
+    gate.hidden = false;
     const context = await window.WarrioData.loadContext();
     currentContext = context;
     if (!context.membership || !context.organization) { view("organization"); return; }
@@ -116,7 +130,7 @@
     if (status) status.innerHTML = `<b><i class="online"></i> Реальні дані підключено</b><span>${escapeHtml(context.organization.name)} · ${escapeHtml(roleNames[context.membership.role] || context.membership.role)}</span>`;
     const logoutButton=document.querySelector('[data-action="logout"]');if(logoutButton)logoutButton.textContent="Вийти з акаунта";
     sessionStorage.removeItem("warrio.demo.enabled");
-    gate.hidden = true;
+    closeGate();
   }
 
   function enterDemoMode() {
@@ -126,7 +140,7 @@
     const logoutButton=document.querySelector('[data-action="logout"]');if(logoutButton)logoutButton.textContent="Увійти до Warrio";
     const status = document.querySelector("#backend-status");
     if (status) status.innerHTML = '<b><i class="online" style="background:#f2a112"></i> Демонстраційні дані</b><span>Supabase доступний, вхід не виконано</span>';
-    gate.hidden = true;
+    closeGate();
   }
 
   document.querySelector("#login-form").addEventListener("submit", async event => {
@@ -179,8 +193,12 @@
 
   (async () => {
     if (!window.WarrioAuth?.configured()) { view("login"); document.querySelector("#login-error").textContent = "Supabase Auth ще не налаштовано."; return; }
-    if (sessionStorage.getItem("warrio.demo.enabled") === "1") { enterDemoMode(); return; }
-    try { const session = await window.WarrioAuth.initialize(); if (session?.recovery) view("reset"); else if (session) await enterLiveMode(); else view("login"); }
+    const demo = sessionStorage.getItem("warrio.demo.enabled") === "1";
+    // A stored session (or demo) means we go straight into the app with no "checking" screen; otherwise show the login at once.
+    if (demo || window.WarrioAuth.hasStoredSession()) view("none"), gate.classList.add("restoring");
+    else view("login");
+    if (demo) { enterDemoMode(); return; }
+    try { const session = await window.WarrioAuth.initialize(); if (session?.recovery) view("reset"); else if (session) await enterLiveMode(true); else view("login"); }
     catch { view("login"); document.querySelector("#login-error").textContent = "Не вдалося відновити сесію. Увійдіть ще раз."; }
   })();
 

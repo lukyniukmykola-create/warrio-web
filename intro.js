@@ -1,5 +1,10 @@
 /* First-ever visit splash: runs once per browser, never on reloads. */
 (function () {
+  // Hide the app until auth-ui.js has put the sign-in / restoring cover in place (no flash of demo data).
+  var html = document.documentElement;
+  html.classList.add("pre-auth");
+  try { if (localStorage.getItem("warrio-theme") === "dark") html.dataset.theme = "dark"; } catch (e) { /* ignore */ }
+  setTimeout(function () { html.classList.remove("pre-auth"); }, 6000);
   try {
     if (localStorage.getItem("warrio-intro")) return;
     localStorage.setItem("warrio-intro", "1");

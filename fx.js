@@ -9,28 +9,33 @@
     if (ctx.state === "suspended") ctx.resume();
     return ctx;
   };
-  // One bubble: sine whose pitch glides up quickly, with a soft attack and a round decay.
-  function bubble(freq, when = 0, len = 0.14, gain = 0.07, rise = 1.7) {
+  // One soft "bloop": low sine that glides up like a water drop, slow round attack, long smooth decay,
+  // a tiny wobble for the bubbly feel and a low-pass so nothing is shrill.
+  function bubble(freq, when = 0, len = 0.24, gain = 0.1, rise = 1.7) {
     const a = audio(); if (!a) return;
     const t = a.currentTime + when;
     const osc = a.createOscillator(), amp = a.createGain(), lp = a.createBiquadFilter();
+    const lfo = a.createOscillator(), lfoAmt = a.createGain();
     osc.type = "sine";
     osc.frequency.setValueAtTime(freq, t);
-    osc.frequency.exponentialRampToValueAtTime(freq * rise, t + len * 0.7);
-    lp.type = "lowpass"; lp.frequency.value = 2400;
+    osc.frequency.exponentialRampToValueAtTime(freq * rise, t + len * 0.4);
+    lfo.type = "sine"; lfo.frequency.value = 24; lfoAmt.gain.value = 22; // +-22 cents wobble
+    lfo.connect(lfoAmt).connect(osc.detune);
+    lp.type = "lowpass"; lp.frequency.value = 900; lp.Q.value = 0.5;
     amp.gain.setValueAtTime(0.0001, t);
-    amp.gain.exponentialRampToValueAtTime(gain, t + 0.012);
-    amp.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    amp.gain.linearRampToValueAtTime(gain, t + 0.022);
+    amp.gain.setTargetAtTime(0.0001, t + 0.03, len / 4.2);
     osc.connect(lp).connect(amp).connect(a.destination);
-    osc.start(t); osc.stop(t + len + 0.03);
+    osc.start(t); lfo.start(t);
+    osc.stop(t + len + 0.12); lfo.stop(t + len + 0.12);
   }
   const sounds = {
-    click: () => bubble(420, 0, 0.11, 0.05),
-    nav: () => { bubble(520, 0, 0.1, 0.05); bubble(700, 0.055, 0.12, 0.04); },
-    open: () => { bubble(330, 0, 0.13, 0.055, 2); bubble(560, 0.07, 0.14, 0.04, 1.8); },
-    close: () => { bubble(620, 0, 0.1, 0.045, 0.6); },
-    ok: () => { bubble(480, 0, 0.12, 0.06); bubble(640, 0.08, 0.12, 0.055); bubble(860, 0.16, 0.18, 0.05); },
-    error: () => { bubble(300, 0, 0.18, 0.06, 0.7); bubble(230, 0.1, 0.2, 0.05, 0.7); }
+    click: () => bubble(210, 0, 0.2, 0.1, 1.75),
+    nav: () => { bubble(230, 0, 0.18, 0.09, 1.7); bubble(310, 0.075, 0.2, 0.08, 1.65); },
+    open: () => { bubble(180, 0, 0.22, 0.095, 1.9); bubble(270, 0.08, 0.22, 0.08, 1.7); },
+    close: () => { bubble(300, 0, 0.18, 0.08, 0.7); },
+    ok: () => { bubble(240, 0, 0.2, 0.09, 1.7); bubble(320, 0.09, 0.2, 0.085, 1.65); bubble(430, 0.18, 0.26, 0.08, 1.6); },
+    error: () => { bubble(250, 0, 0.26, 0.1, 0.72); bubble(180, 0.12, 0.3, 0.095, 0.72); }
   };
   window.WarrioFX = { play: name => (sounds[name] || sounds.click)(), isMuted: () => muted };
 
@@ -56,8 +61,8 @@
     const toasts = document.querySelector("#toasts");
     if (toasts) new MutationObserver(list => {
       for (const m of list) for (const n of m.addedNodes) {
-        const text = (n.textContent || "").toLowerCase();
-        sounds[/помилк|не вдалося|перевірте|недостатньо|error|failed/.test(text) ? "error" : "ok"]();
+        if (!(n instanceof Element) || !n.classList.contains("toast")) continue;
+        sounds[n.classList.contains("toast--warn") ? "error" : "ok"]();
       }
     }).observe(toasts, { childList: true });
   };
@@ -257,6 +262,7 @@
       bell.classList.toggle("has-new", items.some(n => !n.read));
     };
     const toast = (title, text) => {
+      if (window.WarrioApp?.toast) { window.WarrioApp.toast(title, text, "ok"); return; }
       const wrap = document.querySelector("#toasts"); if (!wrap) return;
       const el = document.createElement("div"), b = document.createElement("b"), s = document.createElement("small");
       el.className = "toast"; b.textContent = title; s.textContent = text; el.append(b, s); wrap.append(el);
@@ -583,39 +589,6 @@
   });
 
 
-  // Remember the open section so a refresh doesn't throw you back to the overview.
-  function rememberPage() {
-    const KEY = "warrio-page";
-    const current = () => document.querySelector(".page.active")?.id?.replace("page-", "") || "";
-    let saved = "";
-    try { saved = localStorage.getItem(KEY) || ""; } catch { /* ignore */ }
-    let ready = !saved || saved === "dashboard" || saved === "activation";
-    let tries = 0, restoredAt = 0, userNav = false, auto = false;
-    const save = () => { if (!ready) return; const c = current(); if (c && c !== "activation") { try { localStorage.setItem(KEY, c); } catch { /* ignore */ } } };
-    document.addEventListener("click", event => { if (event.target.closest?.("[data-page],[data-page-link]")) { if (!auto) userNav = true; setTimeout(save, 60); } }, true);
-    new MutationObserver(save).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
-    if (ready) return;
-    const gateOpen = () => { const g = document.querySelector("#auth-gate"); return !g || g.hidden; };
-    const timer = setInterval(() => {
-      tries += 1;
-      if (tries > 80) { clearInterval(timer); ready = true; return; }
-      if (!gateOpen()) return;
-      const btn = document.querySelector(`.nav-btn[data-page="${saved}"]`);
-      if (!btn || btn.hidden) { if (tries > 12) { clearInterval(timer); ready = true; } return; }
-      if (!restoredAt) {
-        restoredAt = tries;
-        document.body.dataset.dir = "up";
-        if (current() !== saved) { auto = true; btn.click(); auto = false; }
-        return;
-      }
-      // the app may reset to the overview once live data arrives: put it back once
-      if (tries - restoredAt >= 5) {
-        if (!userNav && current() !== saved && !document.querySelector("#fx-more")) { auto = true; btn.click(); auto = false; }
-        clearInterval(timer); setTimeout(() => { ready = true; }, 400);
-      }
-    }, 250);
-  }
-
   // Smooth entrance of the whole app after sign-in / session restore / splash.
   function appReveal() {
     const root = document.documentElement;
@@ -781,7 +754,6 @@
 
   function start() {
     appReveal();
-    rememberPage();
     tabbar();
     const host = document.querySelector(".top-actions");
     if (host) host.prepend(sound(), theme());
