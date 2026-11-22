@@ -74,4 +74,4 @@ Pages. Фінальний backend і контрольні SHA-256 зберіга
 
 Публічна перевірка буде доступна за адресою:
 
-`https://<github-user>.github.io/warrio-web/verify/?token={token}`
+`https://warrio.pp.ua/verify/?token={token}`

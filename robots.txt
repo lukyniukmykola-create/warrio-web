@@ -8,4 +8,4 @@ Disallow: /verify/
 Disallow: /service/
 Disallow: /platform/
 
-Sitemap: https://lukyniukmykola-create.github.io/warrio-web/sitemap.xml
+Sitemap: https://warrio.pp.ua/sitemap.xml
